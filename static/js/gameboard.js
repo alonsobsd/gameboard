@@ -45,9 +45,9 @@ function refresh(){
         }
     }
 
-    let redOpId = parseInt($('#red-operations option:selected').attr('value'));
+    let redOpId = $('#red-operations option:selected').attr('value');
 
-    let blueOpId = parseInt($('#blue-operations option:selected').attr('value'));
+    let blueOpId = $('#blue-operations option:selected').attr('value');
     stream('Gold stars mean information was learned to help the team.');
     restRequest('POST', {'red':redOpId,'blue':blueOpId}, draw, '/plugin/gameboard/pieces');
 }
@@ -451,8 +451,8 @@ function submitVerifyDetection(parentId) {
         data['verify'] = 'pid';
     }
     data['info'] = $(parent).find('#pid-entry').val();
-    data['redOpId'] = parseInt($('#red-operations option:selected').attr('value'));
-    data['blueOpId'] = parseInt($('#blue-operations option:selected').attr('value'));
+    data['redOpId'] = $('#red-operations option:selected').attr('value');
+    data['blueOpId'] = $('#blue-operations option:selected').attr('value');
     $(parent).find('#result-box').children().hide();
     restRequest('POST', data, verifyDetectionCallback, '/plugin/gameboard/detection');
 }
