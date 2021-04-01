@@ -63,7 +63,7 @@ class GameboardService(BaseService):
         operations = await self.get_service('data_svc').locate('operations')
         for op in operations:
             for link in op.chain:
-                if str(link_id) == link.unique:
+                if link_id == link.id:
                     return op, link
         return None, None
 
