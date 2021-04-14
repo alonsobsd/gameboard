@@ -342,7 +342,7 @@ function generateQueries(link, opType) {
     else {
         generateSpecific('ProcessId', link.pid, link.finish);
         generateSpecific('CommandLine', '"*' + atob(link.command).split(' ')[0] + '*"', link.finish);
-        if (link.ability.executor == 'psh') {
+        if (link.executor.name == 'psh') {
             generateSpecific('CommandLine', '"*powershell*"', link.finish);
         }
     }

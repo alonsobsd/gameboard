@@ -121,7 +121,7 @@ class GameboardService(BaseService):
         self.file_svc.write_result_file(str(link.id), self.encode_string(str(link_pid)))
 
     def _create_and_setup_verification_link(self, ability, link_pid):
-        link = Link(command=None, paw='gameboard_detection', ability=ability)
+        link = Link(command=None, paw='gameboard_detection', ability=ability, executor=ability.executors[0])
         fact = Fact(trait='host.process.id', value=link_pid)
         link.used.append(fact)
         link.facts.append(fact)
