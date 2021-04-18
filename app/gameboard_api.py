@@ -245,7 +245,7 @@ class GameboardApi(BaseService):
         ability_id = str(uuid.uuid4())
         executors = []
         for pl in ['windows', 'darwin', 'linux']:
-            reference_executor = reference_ability.get_executor(pl, 'elasticsearch')
+            reference_executor = reference_ability.find_executor(pl, 'elasticsearch')
             if not reference_executor:
                 continue
             parsers = deepcopy(reference_executor.parsers)
