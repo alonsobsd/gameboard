@@ -6,8 +6,8 @@ from aiohttp import web
 from aiohttp_jinja2 import template
 
 from app.objects.c_ability import Ability
-from app.objects.secondclass.c_executor import Executor
 from app.objects.c_source import Source
+from app.objects.secondclass.c_executor import Executor
 from app.objects.secondclass.c_fact import Fact
 from app.utility.base_service import BaseService
 from app.service.auth_svc import for_all_public_methods, check_authorization
