@@ -192,9 +192,9 @@ function getLinkInfo(exchanges, result) {
     document.getElementById('piece-modal').style.display='block';
     $('#piece-id').html(link['id']);
     $('#piece-ability').html(link['ability']['name']);
-    $('#piece-cmd').html(atob(link['command']));
+    $('#piece-cmd').html(b64DecodeUnicode(link['command']));
     function loadResults(data){
-        $('#piece-output').html(atob(data['output']));
+        $('#piece-output').html(b64DecodeUnicode(data['output']));
     }
     restRequest('POST', {'index':'result','link_id':link.id}, loadResults);
     let factList = $('#piece-fact-list');
@@ -341,7 +341,7 @@ function generateQueries(link, opType) {
     }
     else {
         generateSpecific('ProcessId', link.pid, link.finish);
-        generateSpecific('CommandLine', '"*' + atob(link.command).split(' ')[0] + '*"', link.finish);
+        generateSpecific('CommandLine', '"*' + b64DecodeUnicode(link.command).split(' ')[0] + '*"', link.finish);
         if (link.ability.executor == 'psh') {
             generateSpecific('CommandLine', '"*powershell*"', link.finish);
         }
@@ -379,7 +379,7 @@ function updatedPin(data) {
         for (let i=0; i<links.length; i++) {
             let template = $("#parent-link-ability-select-template").clone();
             template.find(".parent-link-pid").val(links[i].pid);
-            template.find(".link-command").text(atob(links[i].command))
+            template.find(".link-command").text(b64DecodeUnicode(links[i].command))
             template.find(".atomic-button").on('click', function () { selectParentLinkAbility($('#pin-modal-link-id').val(), $(this)) })
             template.attr("id", "parent-link-ability-" + links[i].id);
             template.css('display', 'flex');
