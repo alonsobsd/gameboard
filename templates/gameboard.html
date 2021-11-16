@@ -1,323 +1,169 @@
-<link rel="stylesheet" href="/gameboard/css/gameboard.css">
-
-<div id="gameboard" class="section-profile">
-    <div class="row">
-        <div class="topleft duk-icon"><img onclick="removeSection('gameboard')" src="/gui/img/x.png"></div>
-        <div class="bottomright duk-icon"><img onclick="toggleSidebar('gameboard-sidebar')" src="/gui/img/expand.png"></div>
-        <div id="gameboard-sidebar" class="column section-border" style="flex:25%;text-align:left;padding:15px;">
-             <h1 style="font-size:50px;margin-top:0;">GameBoard</h1>
-             <h2 style="margin-top:-35px">red vs. blue exercises</h2>
-             <p style="text-align:left">
-                 Monitor red-and-blue team operations during an exercise to see if blue can detect, respond and
-                 shut down a red-team adversary.
-             </p>
-             <br>
-             <select id="red-operations" onchange="refresh()">
-                <option value="" disabled selected>Select a red operation</option>
-                {% for op in red_ops %}
-                    <option value="{{ op.id }}">{{ op.name }} - {{ op.start }}</option>
-                {% endfor %}
-             </select>
-             <p id="red-status" class="status" style="display: None"></p>
-            <select id="blue-operations" onchange="refresh()">
-                <option value="" disabled selected>Select a blue operation</option>
-                {% for op in blue_ops %}
-                    <option value="{{ op.id }}">{{ op.name }} - {{ op.start }}</option>
-                {% endfor %}
-             </select>
-            <p id="blue-status" class="status" style="display: None"></p>
-            <br>
-            <button class="button-success button-atomic" onclick="refresh()">Refresh</button>
-            <div id="gb-stats-table-wrapper" style="width: 200px;text-align: center;margin-left: 30px;margin-bottom: 20px">
-                <h2>Stats</h2>
-                <table id="gb-stats-table" style="border-collapse: collapse">
-                    <tr id="gb-stats-table-header" class="gb-stats-table-row" style="color: white">
-                        <th></th>
-                        <th>Pos</th>
-                        <th>Neg</th>
-                    </tr>
-                    <tr id="gb-stats-table-true" class="gb-stats-table-row" style="color: cornflowerblue">
-                        <th>True</th>
-                        <td>0%</td>
-                        <td style="font-weight: normal;font-size: 18px">N/A</td>
-                    </tr>
-                    <tr id="gb-stats-table-false" class="gb-stats-table-row" style="color: orangered">
-                        <th>False</th>
-                        <td>0%</td>
-                        <td>0%</td>
-                    </tr>
-                </table>
-            </div>
-            <button class="button-success button-atomic" id="elastic-op" onclick="openAnalyticModal()">Custom Analytic</button>
-        </div>
-        <div id="the-gameboard" class="column">
-            <div class="gameboard-row scoreboard">
-              <div class="gameboard-column side"></div>
-              <div class="gameboard-column">
-                  <div class="scoreboard-points scoreboard-red">
-                      <p id="gb-red-points">0</p>
-                      <p style="font-size:12px;margin-top: -40px">points</p>
-                  </div>
-              </div>
-              <div class="gameboard-column mid">
-                  <h3>Process</h3>
-              </div>
-              <div class="gameboard-column">
-                  <div class="scoreboard-points scoreboard-blue">
-                      <p id="gb-blue-points">0</p>
-                      <p style="font-size:12px;margin-top: -40px">points</p>
-                  </div>
-                  <div id="gameboard-add-manual-detection-div" style="display:none">
-                      <br><button type="button" class="atomic-button" id="open-verify-modal" onclick="document.getElementById('verify-detection-modal').style.display='block'">+ Add External Detection</button>
-                  </div>
-              </div>
-              <div class="gameboard-column side"></div>
-            </div>
-            <div id="exchanges" style="margin: 10px 0px;"></div>
-        </div>
+<div id="gameboardPage" x-data="alpineGameboard()" x-init="initPage()">
+    <div>
+        <h2>Gameboard<sub class="is-size-7 pl-1">red vs. blue exercises</sub></h2>
+        <p>
+            Monitor red-and-blue team operations during an exercise to see if blue can detect, respond, and
+            shut down a red-team adversary.
+        </p>
     </div>
-</div>
-
-<div id="exchange" class="gameboard-row" style="display:none;">
-  <div class="gameboard-column red points-delta"></div>
-  <div class="gameboard-column red gp-link"></div>
-  <div class="gameboard-column mid">
-      <span class="gp-pid"></span>
-      <span class="gp-host"></span>
-  </div>
-  <div class="gameboard-column blue gp-link"></div>
-  <div class="gameboard-column blue points-delta"></div>
-</div>
-<div id="red-wrapper" class="gp-wrapper" style="display:none"></div>
-<div id="blue-wrapper" class="gp-wrapper" style="display:none"></div>
-<div id="red-piece" class="gameboard-column gp-red" style="display:none">
-    <span class="golden-goose"><span></span></span>
-    <span class="gp-ability"></span>
-    <span class="gp-time"></span>
-    <span class="gp-agent"></span>
-</div>
-<div id="blue-piece" class="gameboard-column gp-blue" style="display:none">
-    <span class="gp-blue-pin" style="cursor: pointer"><img class="gp-blue-pin-img" src="/gameboard/img/pin.png"/></span>
-    <span class="golden-goose"><span></span></span>
-    <span class="gp-ability"></span>
-    <span class="gp-time"></span>
-    <span class="gp-agent"></span>
-</div>
-<div id="cover-piece" class="gameboard-column gp-cover" style="display:none">
-    <span class="gp-ability"></span>
-    <span class="gp-tid"></span>
-    <span class="gp-reveal">Click to reveal more information</span>
-</div>
-<div id="points-wrapper" class="points-wrapper" style="display:none"></div>
-<div id="points-piece" class="gameboard-column gp-points points-cover" style="display:none">
-    <span class="points-value"></span>
-</div>
-<div id="points-details" class="gameboard-column gp-points points-details" style="display:none">
-    <span class="points-reason"></span>
-</div>
-
-<div id="piece-modal" class="modal">
-    <div class="modal-content ability-viewer">
-        <div class="imgcontainer">
-          <span onclick="resetPieceModal();" class="close" title="Close Modal">&times;</span>
-        </div>
-        <div class="container" style="text-align:left; padding: 10px 50px 100px;">
-            <div class="column" style="margin: 20px 0px;">
-                <table style="border-spacing:2px;width:100%;" rules="rows">
-                    <tbody>
-                        <tr>
-                            <td style="width: 10%;"><b>Link Unique:</b></td>
-                            <td><div id="piece-id" style="padding: 10px 0px;"></div></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 10%;"><b>Ability:</b></td>
-                            <td><div id="piece-ability" style="padding: 10px 0px;"></div></td>
-                        </tr>
-                        <tr>
-                            <td style="width:10%"><b>Command:</b></td>
-                            <td><pre id="piece-cmd" style="margin: 10px 0px;"></pre></td>
-                        </tr>
-                        <tr>
-                            <td style="width:10%"><b>Output:</b></td>
-                            <td><pre id="piece-output" style="margin: 10px 0px;"></pre></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div id="facts-found">
-                <h4 class="collapsible" id="facts-found-header">New Facts Found</h4>
-                <div class="collapsible-content" id="piece-fact-list" style="display: none">
-                    <pre id="default-fact" style="display: none"></pre>
-                </div>
-            </div>
-            <div id="suggested-queries">
-                <h4 class="collapsible" id="suggested-queries-header">Suggested Queries</h4>
-                <div class="collapsible-content" id="piece-queries" style="display: none">
-                    <p id="default-query-type" style="display:none"></p>
-                    <pre id="default-query" style="display: none"></pre>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="verify-detection-modal" class="modal" style="display:none">
-    <div class="modal-content" style="width:60%">
-        <div class="container">
-            <div class="row duk-modal" style="display:block">
-                <div onclick="document.getElementById('verify-detection-modal').style.display='none'">
-                    <span class="close" title="Close Modal">&times;</span>
-                </div>
-                <div id="verify-detection-form" class="row-simple" style="width:100%">
-                    <div class="column" style="width:75%;margin-bottom:-35px">
-                        <div class="column" style="flex:60%">
-                            <table frame=void rules=rows style="border-spacing:2px;width:100%">
-                                <tr>
-                                    <td style="width:10%"><b style="color:white">host:</b></td>
-                                    <td>
-                                        <select id="host-select" style="width:99%; margin:5px">
-                                            <option value="" disabled="disabled" selected>Select a host</option>
-                                            {% for host in hosts %}
-                                                <option id="select-{{ host }}" value="{{ host }}">{{ host }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="width:10%"><b style="color:white">tactic:</b></td>
-                                    <td>
-                                        <select id="tactic-select" onchange="verifyPopulateTechniques('verify-detection-modal', tactics_and_techniques)" style="width:99%; margin:5px">
-                                            <option disabled selected>Choose a tactic</option>
-                                            {% for tactic in tactics %}
-                                                <option value="{{ tactic }}" data-tactic="{{ tactic }}">{{ tactic }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="width:10%"><b style="color:white">technique:</b></td>
-                                    <td>
-                                        <select id="technique-select" style="width:99%; margin:5px">
-                                            <option disabled selected>Choose a technique</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="display:flex;border:none">
-                                        <div class="toggle" style="margin-top:3px; flex:90%">
-                                            <label class="switch"><input type="checkbox" id="togBtnHunt" >
-                                                <div class="slider round" style="background-color:black">
-                                                    <span class="on" style="top:45%"><b style="font-size:16px">guid</b></span>
-                                                    <span class="off" style="top:45%"><b style="font-size:16px">pid</b></span>
-                                                </div>
-                                            </label>
-                                        </div>
-                                        <div id="guid-select-duk-icon" class="duk-icon" style="flex:10%;margin-top:2px">
-                                            <img style="height:10px" src="/gui/img/duk.png">
-                                            <span id="guid-select-duk-text">In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.</span>
-                                        </div>
-                                    </td>
-                                    <td><input id="pid-entry" type="text" placeholder="Enter PID/GUID" style="width:99%;margin:5px;text-align:left;"></td>
-                                </tr>
-                            </table>
-                            <button id="submit-verify-detection" type="button" class="button-success atomic-button" onclick="submitVerifyDetection('verify-detection-modal')" style="margin-top:25px;width:50%;padding:0px">Submit</button>
+    <hr>
+    <div>
+        <table class="table points-table is-fullwidth">
+            <thead>
+            <tr>
+                <th colspan="2">
+                    <div class="is-flex is-flex-direction-column is-align-items-center">
+                        <div class="is-flex is-flex-direction-row">
+                            <div><i class="fas fa-user pr-3 is-red-team is-size-1" alt="Red team"></i></div>
+                            <div><h3 class="pl-1 is-size-2 is-red-team" alt="Red team" x-text="redOperation.points + ' points'"></h3></div>
                         </div>
+                        <div class="select is-small">
+                            <label for="red-op-select" class="is-hidden">Select a red operation</label>
+                            <select id="red-op-select" x-model="redOperation.id" x-on:change="handleOperationChange">
+                                <option value="">Select a red op</option>
+                                <template x-for="op in redOps" :key="op.id">
+                                    <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <label x-bind:class="redOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
+                               class="is-size-6 m-2" for="red-op-select" x-text="redOperation.state"></label>
                     </div>
-                </div>
-                <div id="hunt-result" style="">
-                    <div id="result-box" class="column">
-                        <div id="result-correct" style="display:none">
-                            <img class="hunt-result-img" src="/gameboard/img/check-mark.png"/>
-                            <h4 class="hunt-result-txt">The information you entered matched correctly!</h4>
-                        </div>
-                        <div id="result-wrong" style="display:none">
-                            <img class="hunt-result-img" src="/gameboard/img/x-mark.png"/>
-                            <h4 class="hunt-result-txt">The information you entered did not match correctly.</h4>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="pin-blue-link-modal" class="modal" style="display: none">
-    <div class="modal-content" style="width:60%">
-        <div class="container">
-            <div class="row duk-modal" style="display:block">
-                <div onclick="document.getElementById('pin-blue-link-modal').style.display='none'">
-                    <span class="close" title="Close Modal">&times;</span>
-                </div>
-                <strong id="pin-blue-link-modal-link-name">Find Child Process</strong><br><br>
-                <div id="pin-blue-link-modal-desc-text">Determine if the PID to match is the top-level ability's PID or a PID of one of its child processes, and then enter the PID to match for.</div>
-                <div id="pin-blue-link-form" class="row-simple">
-                    <div class="toggle" onclick="toggleParentChild()">
-                        <label class="switch"><input type="checkbox" id="togBtnParentChild" >
-                            <div class="slider round">
-                                <span class="on" style="top:45%"><b>Child</b></span>
-                                <span class="off" style="top:45%"><b>Parent</b></span>
+                </th>
+                <th colspan="2">
+                    <div class="is-flex is-flex-direction-column is-align-items-center">
+                        <div class="is-flex is-flex-direction-row">
+                            <div><i class="fas fa-user pr-3 is-blue-team is-size-1" alt="Blue team"></i></div>
+                            <div><h3 class="pl-1 is-size-2 is-blue-team" alt="Blue team" x-text="blueOperation.points + ' points'"></h3>
                             </div>
-                        </label>
+                        </div>
+                        <div class="select is-small">
+                            <label for="blue-op-select" class="is-hidden">Select a blue operation</label>
+                            <select id="blue-op-select" x-model="blueOperation.id" x-on:change="handleOperationChange">
+                                <option value="">Select a blue op</option>
+                                <template x-for="op in blueOps" :key="op.id">
+                                    <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <label x-bind:class="blueOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
+                               class="is-size-6 m-2" for="blue-op-select" x-text="blueOperation.state"></label>
                     </div>
-                    <select id="pin-link-host-select">
-                        <option value="" disabled="disabled" selected>Select a host</option>
-                        {% for host in hosts %}
-                            <option id="pin-select-{{ host }}" value="{{ host }}">{{ host }}</option>
-                        {% endfor %}
-                    </select>
-                    <input class="pin" type="text" id="piece-pin-input" placeholder="PID">
-                    <input id="pin-modal-link-id" type="hidden">
-                </div>
-                <div id="pin-blue-link-submit-wrapper" style="display: flex">
-                    <button id="pin-blue-link-submit" class="button-success atomic-button" onclick="savePin()">Submit</button>
-                    <div class="save-msg" id="save-pin-msg"></div>
-                </div>
-                <div id="match-parent-link-form" class="row-simple" style="width:100%">
-                    <div id="match-parent-link-form-contents" class="column">
-                        Select the correct ability to match with.
-                        <div id="parent-links" class="column" style="flex:60%"></div>
+                </th>
+                <td>
+                    <div class="is-flex is-flex-direction-column is-align-items-center mb-3">
+                        <h3>Stats</h3>
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><i class="fas fa-plus"></i></th>
+                                <th><i class="fas fa-minus"></i></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th>True</th>
+                                <td class="is-blue-team">100%</td>
+                                <td class="is-blue-team">100%</td>
+                            </tr>
+                            <tr>
+                                <th>False</th>
+                                <td class="is-red-team">50%</td>
+                                <td class="is-red-team">50%</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-            </div>
-        </div>
+                </td>
+            </tr>
+            </thead>
+            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0">
+            <tbody>
+                <template x-for="(red, e_index) in exchanges.red" :key="'ex-'+e_index">
+                    <tr class="m-2">
+                        <td class="is-flex is-flex-direction-column is-align-items-center m-3">
+                            <span x-text="red.ability.name"></span>
+                            <span x-text="getHumanFriendlyTimeISO8601(red.finish)"></span>
+                            <span x-text="red.paw"></span>
+                        </td>
+                        <td class="is-size-2 is-red-team mt-1"><i class="far fa-circle"></i></td>
+                        <td class="is-size-2 is-blue-team" x-text="exchanges.blue[e_index]?.points.value"></td>
+                        <td class="is-vertical" x-text="exchanges.blue[e_index]?.points.reason"></td>
+                    </tr>
+                </template>
+            </tbody>
+            </template>
+        </table>
     </div>
 </div>
-
-<div id="analytic-op-modal" class="modal">
-    <div class="modal-content ability-viewer">
-        <div class="imgcontainer">
-          <span onclick="resetAnalyticOpModal();" class="close" title="Close Modal">&times;</span>
-        </div>
-        <div class="container" style="text-align:left; padding: 10px 50px 100px;">
-            <div class="column" style="margin: 20px 0px;">
-                <table style="border-spacing:2px;width:100%" rules="rows">
-                    <tbody>
-                        <tr>
-                            <td style="width: 10%;"><b>Name:</b></td>
-                            <td><input id="analytic-name" style="padding: 10px 0px;"></td>
-                        </tr>
-                        <tr>
-                            <td style="width: 10%;"><b>Query:</b></td>
-                            <td><textarea id="analytic-query" style="padding: 10px 0px; width: 90%"></textarea></td>
-                        </tr>
-                    </tbody>
-                </table>
-                <center><div id="analytic-error"></div></center>
-            </div>
-
-            <button class="button-success atomic-button pin-save" id="analytic-save" onclick="createAnalytic()">Create Analytic</button>
-        </div>
-    </div>
-</div>
-
-<div id="parent-link-ability-select-template" style="display: flex;align-items: center;display: none">
-    <input class="parent-link-pid" type="hidden" value="">
-    <div class="link-command"></div>
-    <button type="button" class="button-success atomic-button" style="width:19%; display:flex; align-items:center; justify-content:center">Select</button>
-</div>
-
-<script src="/gameboard/js/gameboard.js"></script>
 
 <script>
-    var tactics_and_techniques = {{ tactics | tojson }};
+    let redOps = {{ red_ops | tojson }};
+    let blueOps = {{ blue_ops | tojson }};
+
+    function alpineGameboard() {
+        return {
+            gameboard: [],
+            redOperation: {
+                id: '',
+                state: '',
+                points: 0
+            },
+            blueOperation: {
+                id: '',
+                state: '',
+                points: 0
+            },
+            access: '',
+            exchanges: {
+                red: [],
+                blue: []
+            },
+
+            initPage() {
+                // console.log('ops', this.redOps, this.blueOps);
+            },
+            handleOperationChange() {
+                console.log('changed', this.redOperation.id, this.blueOperation.id);
+                const render = (data) => {
+                    console.log('render called', data);
+                    this.redOperation.state = data.red_op_state;
+                    this.blueOperation.state = data.blue_op_state;
+                    this.redOperation.points = data.points[0];
+                    this.blueOperation.points = data.points[1];
+                    this.access = data.access;
+                    console.log(data.exchanges, data.access, this.access)
+                    if (data.exchanges[0] && data.exchanges[0].length > 1) {
+                        console.log('EXCHANGES', data.exchanges[0][1])
+                        this.exchanges = data.exchanges[0][1];
+                    }
+                };
+                restRequest('POST', { red: this.redOperation.id, blue: this.blueOperation.id }, render, '/plugin/gameboard/pieces');
+            },
+        };
+    }
+
+    // # sourceURL=gameboard.js
 </script>
+
+<style>
+    #gameboardPage .is-red-team {
+        color: #BF1414;
+    }
+    #gameboardPage .is-blue-team {
+        color: #4444D8;
+    }
+
+    #gameboardPage .points-table thead th:not(:last-child) {
+        width: 40%;
+    }
+
+    #gameboardPage .points-table tr, #gameboardPage .points-table td {
+        border: none;
+    }
+
+    #gameboardPage .points-table tr, #gameboardPage .points-table td {
+        vertical-align: middle !important;
+    }
+</style>
