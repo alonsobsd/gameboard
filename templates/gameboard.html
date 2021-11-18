@@ -88,7 +88,7 @@
                 <tr><td colspan="4" class="is-italic has-text-centered">No exchanges to show.</td></tr>
                 </tbody>
             </template>
-            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && access === 'red' && exchanges.red">
+            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <template x-if="exchanges.blue.length > 0">
                     <tr>
@@ -107,22 +107,6 @@
                         <td class="is-blue-team" x-text="exchanges.blue[e_index]?.points.reason"></td>
                     </tr>
                 </template>
-                </tbody>
-            </template>
-            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && access === 'blue' && exchanges.blue">
-                <tbody>
-                    <template x-for="(blueOp, e_index) in exchanges.blue" :key="'ex-'+e_index">
-                        <tr class="m-2">
-                            <td x-text="exchanges.red[e_index]?.points.reason" class="is-red-team"></td>
-                            <td class="is-size-2 is-red-team" x-text="exchanges.red[e_index]?.points.value"></td>
-                            <td class="is-size-2 is-blue-team mt-1" x-text="blueOp.points.value" title="blueOp.points.reason"></td>
-                            <td class="is-flex is-flex-direction-column is-align-items-center m-3">
-                                <button x-on:click="openModal('Facts', blueOp)" class="facts-link is-blue-team" x-text="blueOp.ability.name"></button>
-                                <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(blueOp.finish)"></span>
-                                <span class="is-italic has-text-grey-light" x-text="blueOp.paw"></span>
-                            </td>
-                        </tr>
-                    </template>
                 </tbody>
             </template>
         </table>
@@ -252,7 +236,7 @@
                 <footer class="modal-card-foot">
                     <nav class="level">
                         <div class="level-left">
-                            <template x-if="access === 'red' && modal.title !== 'Analytic'">
+                            <template x-if="modal.title !== 'Analytic'">
                                 <div class="level-item">
                                     <button class="button is-small" @click="modal.isOpen = false">Close</button>
                                 </div>
