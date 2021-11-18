@@ -157,7 +157,82 @@
                             </div>
                         </div>
                     </template>
-                    <template x-if="modal.title === 'Facts'">
+                    <template x-if="modal.title.includes('Detection')">
+                        <div>
+                            <div class="modal-form">
+                                <div>
+                                    <label for="host-select">Host</label>
+                                    <div class="modal-form-fields">
+                                        <div class="select is-small my-2 ml-3">
+                                            <select id="host-select" x-model="selectedHost">
+                                                <option value="" selected>Select a host</option>
+                                                {% for host in hosts %}
+                                                    <option value="{{ host }}">{{ host }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="tactic-select">Tactic</label>
+                                    <div class="modal-form-fields">
+                                        <div class="select is-small my-2 ml-3">
+                                            <select id="tactic-select" x-model="selectedTactic" x-on:change="handleTacticChange()">
+                                                <option value="" selected>Select a tactic</option>
+                                                <template x-for="(tactic, index) in tactics" :key="'tactic'-index">
+                                                    <option x-text="tactic"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="technique-select">Technique</label>
+                                    <div class="modal-form-fields">
+                                        <div class="select is-small my-2 ml-3">
+                                            <select id="technique-select" x-model="selectedTechnique">
+                                                <option value="" selected>Select a technique</option>
+                                                <template x-for="(technique, index) in techniques" :key="'technique'-index">
+                                                    <option x-text="technique[0] + ': ' + technique[1]"></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center width-100">
+                                    <label class="is-hidden" for="detection-id-input">Detect-by ID</label>
+                                    <div class="toggleContainer mt-2 ml-6">
+                                        <label for="toggleDetectionID">
+                                            <span class="has-tooltip-multiline has-tooltip-right"
+                                                  data-tooltip="In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.">pid</span>
+                                        </label>
+                                        <div class="toggleSwitch mx-2">
+                                            <input type="checkbox"
+                                                   id="toggleDetectionID"
+                                                   x-model="detectByGuid"
+                                                   x-bind:checked="Boolean(detectByGuid) ? 'checked' : null"/>
+                                            <span class="toggleSlider toggleSliderRound"
+                                                  title="Toggle between detection with guid and pid"
+                                                  x-on:click="detectByGuid = (detectByGuid === 0 ? 1 : 0);"
+                                                  x-bind:class="Boolean(detectByGuid) ? 'toggle-on' : 'toggle-off'">
+                                                    <span x-bind:class="Boolean(detectByGuid) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
+                                                </span>
+                                        </div>
+                                        <label for="toggleDetectionID">
+                                            <span class="has-tooltip-multiline"
+                                                  data-tooltip="In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.">guid</span>
+                                        </label>
+                                    </div>
+                                    <div class="modal-form-fields">
+                                        <input id="detection-id-input"
+                                               class="mt-4 ml-4"
+                                               x-model="detectionID">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="modal.title === 'Facts' && modal.content">
                         <div>
                             <p x-text="modal.content.ability.name"></p>
                             <p class="is-italic" x-text="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name"></p>
@@ -180,15 +255,18 @@
                             <template x-if="access === 'red' && modal.title === 'Facts'">
                                 <button class="button is-small" @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic</button>
                             </template>
-                        </div>
-                        <div class="level-right">
                             <template x-if="access === 'red' && modal.title !== 'Analytic'">
                                 <div class="level-item">
                                     <button class="button is-small" @click="modal.isOpen = false">Close</button>
                                 </div>
                             </template>
+                        </div>
+                        <div class="level-right">
                             <template x-if="modal.title === 'Analytic'">
-                                <button class="button is-small" @click="createAnalytic(analytic)">Save</button>
+                                <button class="button is-small is-primary" @click="createAnalytic(analytic)">Save</button>
+                            </template>
+                            <template x-if="modal.title.includes('Detection')">
+                                <button class="button is-small is-primary" @click="handleSubmitDetection()">Submit</button>
                             </template>
                         </div>
                     </nav>
@@ -201,6 +279,7 @@
 <script>
     let redOps = {{ red_ops | tojson }};
     let blueOps = {{ blue_ops | tojson }};
+    let allTactics = {{ tactics | tojson }};
 
     function alpineGameboard() {
         return {
@@ -229,14 +308,21 @@
                 false_pos: 0,
                 false_neg: 0,
             },
+            tactics: [],
+            techniques: [],
+            selectedHost: '',
+            selectedTactic: '',
+            selectedTechnique: '',
+            detectByGuid: 1,
+            detectionID: '',
+            huntResults: '',
 
             initPage() {
-                // console.log('ops', this.redOps, this.blueOps);
+                if (allTactics) this.tactics = Object.keys(allTactics);
             },
             handleOperationChange() {
                 const render = (data) => {
                     this.resetTables();
-                    console.log('render called', data);
                     this.redOperation.state = data.red_op_state;
                     this.blueOperation.state = data.blue_op_state;
                     this.redOperation.points = data.points[0];
@@ -253,6 +339,30 @@
                     }
                 };
                 restRequest('POST', { red: this.redOperation.id, blue: this.blueOperation.id }, render, '/plugin/gameboard/pieces');
+            },
+            handleTacticChange() {
+                if (this.selectedTactic && this.selectedTactic in allTactics) this.techniques = allTactics[this.selectedTactic];
+                else toast('No techniques available for this tactic.', false);
+            },
+            handleSubmitDetection() {
+                const submitDetectionCallback = (data) => {
+                    this.modal.isOpen = false;
+                    if (data.verified != false) {
+                        this.huntResults = `The information you entered matched correctly! Result:${data.message}`;
+                        toast(this.huntResults, true);
+                    } else {
+                        this.huntResults = 'The information you entered did not match correctly.';
+                        toast(this.huntResults, false);
+                    }
+                };
+                restRequest('POST', {
+                    host: this.selectedHost,
+                    technique: this.selectedTechnique,
+                    verify: this.detectByGuid ? 'guid' : 'pid',
+                    info: this.detectionID,
+                    redOpId: this.redOperation.id,
+                    blueOpId: this.blueOperation.id,
+                }, submitDetectionCallback, '/plugin/gameboard/detection');
             },
             resetTables() {
                 this.exchanges = {
@@ -287,14 +397,11 @@
                 this.stats.false_neg = Math.round((F_N / total) * 100);
             },
             createAnalytic(analytic) {
-                console.log('create analytic', analytic)
                 const handleAnalyticCallback = (data) => {
-                    console.log('analytic data', data)
                     this.modal.isOpen = false;
                     toast('Custom analytic created; Operation started.', true);
                 };
                 restRequest('POST', analytic, handleAnalyticCallback, '/plugin/gameboard/analytic');
-                // resetAnalyticOpModal()
             }
         };
     }
