@@ -277,12 +277,12 @@
 </div>
 
 <script>
-    let redOps = {{ red_ops | tojson }};
-    let blueOps = {{ blue_ops | tojson }};
-    let allTactics = {{ tactics | tojson }};
 
     function alpineGameboard() {
         return {
+            redOps: {{ red_ops | tojson }},
+            blueOps: {{ blue_ops | tojson }},
+            allTactics: {{ tactics | tojson }},
             redOperation: {
                 id: '',
                 state: '',
@@ -318,7 +318,7 @@
             huntResults: '',
 
             initPage() {
-                if (allTactics) this.tactics = Object.keys(allTactics);
+                if (this.allTactics) this.tactics = Object.keys(this.allTactics);
             },
             handleOperationChange() {
                 const render = (data) => {
@@ -341,7 +341,7 @@
                 restRequest('POST', { red: this.redOperation.id, blue: this.blueOperation.id }, render, '/plugin/gameboard/pieces');
             },
             handleTacticChange() {
-                if (this.selectedTactic && this.selectedTactic in allTactics) this.techniques = allTactics[this.selectedTactic];
+                if (this.selectedTactic && this.selectedTactic in this.allTactics) this.techniques = this.allTactics[this.selectedTactic];
                 else toast('No techniques available for this tactic.', false);
             },
             handleSubmitDetection() {
