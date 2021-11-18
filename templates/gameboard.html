@@ -83,18 +83,28 @@
                 </td>
             </tr>
             </thead>
+            <template x-if="exchanges.blue.length < 1 && exchanges.red.length < 1">
+                <tbody>
+                <tr><td colspan="4" class="is-italic has-text-centered">No exchanges to show.</td></tr>
+                </tbody>
+            </template>
             <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && access === 'red' && exchanges.red">
                 <tbody>
+                <template x-if="exchanges.blue.length > 0">
+                    <tr>
+                        <td colspan="4" class="has-text-right"><button x-on:click="openModal('Add External Detection', null)" class="button is-primary is-blue-team is-small mr-6">Add External Detection</button></td>
+                    </tr>
+                </template>
                 <template x-for="(redOp, e_index) in exchanges.red" :key="'ex-'+e_index">
                     <tr class="m-2">
                         <td class="is-flex is-flex-direction-column is-align-items-center m-3">
-                            <button x-on:click="openModal('Facts', redOp)" class="facts-link" x-text="redOp.ability.name"></button>
+                            <button x-on:click="openModal('Facts', redOp)" class="facts-link is-red-team" x-text="redOp.ability.name"></button>
                             <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
                             <span class="is-italic has-text-grey-light" x-text="redOp.paw"></span>
                         </td>
                         <td class="is-size-2 is-red-team mt-1" x-text="redOp.points.value" title="redOp.points.reason"></td>
                         <td class="is-size-2 is-blue-team" x-text="exchanges.blue[e_index]?.points.value"></td>
-                        <td x-text="exchanges.blue[e_index]?.points.reason"></td>
+                        <td class="is-blue-team" x-text="exchanges.blue[e_index]?.points.reason"></td>
                     </tr>
                 </template>
                 </tbody>
@@ -103,11 +113,11 @@
                 <tbody>
                     <template x-for="(blueOp, e_index) in exchanges.blue" :key="'ex-'+e_index">
                         <tr class="m-2">
-                            <td x-text="exchanges.red[e_index]?.points.reason"></td>
+                            <td x-text="exchanges.red[e_index]?.points.reason" class="is-red-team"></td>
                             <td class="is-size-2 is-red-team" x-text="exchanges.red[e_index]?.points.value"></td>
                             <td class="is-size-2 is-blue-team mt-1" x-text="blueOp.points.value" title="blueOp.points.reason"></td>
                             <td class="is-flex is-flex-direction-column is-align-items-center m-3">
-                                <button x-on:click="openModal('Facts', blueOp)" class="facts-link" x-text="blueOp.ability.name"></button>
+                                <button x-on:click="openModal('Facts', blueOp)" class="facts-link is-blue-team" x-text="blueOp.ability.name"></button>
                                 <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(blueOp.finish)"></span>
                                 <span class="is-italic has-text-grey-light" x-text="blueOp.paw"></span>
                             </td>
@@ -150,25 +160,25 @@
                     <template x-if="modal.title === 'Facts'">
                         <div>
                             <p x-text="modal.content.ability.name"></p>
+                            <p class="is-italic" x-text="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name"></p>
+                            <p class="is-italic" x-text="modal.content.points.value + ' points: ' + modal.content.points.reason "></p>
+                            <p x-show="modal.content.command" x-text="'Command: '+ b64DecodeUnicode(modal.content.command)"></p>
+                            <p x-show="modal.content.output" x-text="'Output: '+ modal.content.output"></p>
                             <template x-if="access === 'red'">
                                 <p class="is-italic" x-show="modal.content.pid" x-text="'pid: '+ modal.content.pid"></p>
+                                <p x-text="modal.content.facts.length > 0 ? modal.content.facts : 'No facts.'"></p>
                             </template>
                             <template x-if="access === 'blue'">
                                 <p class="is-italic" x-show="modal.content.pin" x-text="'pin: '+ modal.content.pin"></p>
                             </template>
-                            <p class="is-italic" x-text="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name"></p>
-                            <p class="is-italic" x-text="modal.content.points.value + ' points: ' + modal.content.points.reason "></p>
-                            <p x-text="modal.content.facts.length > 0 ? modal.content.facts : 'No facts.'"></p>
-                            <p x-show="modal.content.command" x-text="'Command: '+ b64DecodeUnicode(modal.content.command)"></p>
-                            <p x-show="modal.content.output" x-text="'Output: '+ modal.content.output"></p>
                         </div>
                     </template>
                 </section>
                 <footer class="modal-card-foot">
                     <nav class="level">
                         <div class="level-left">
-                            <template x-if="access === 'red' && modal.title !== 'Analytic'">
-                                <button class="button is-small" @click="modal.isOpen = false; openModal('Analytic');">Create Analytic</button>
+                            <template x-if="access === 'red' && modal.title === 'Facts'">
+                                <button class="button is-small" @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic</button>
                             </template>
                         </div>
                         <div class="level-right">
@@ -194,7 +204,6 @@
 
     function alpineGameboard() {
         return {
-            gameboard: [],
             redOperation: {
                 id: '',
                 state: '',
@@ -225,8 +234,8 @@
                 // console.log('ops', this.redOps, this.blueOps);
             },
             handleOperationChange() {
-                console.log('changed', this.redOperation.id, this.blueOperation.id);
                 const render = (data) => {
+                    this.resetTables();
                     console.log('render called', data);
                     this.redOperation.state = data.red_op_state;
                     this.blueOperation.state = data.blue_op_state;
@@ -245,9 +254,20 @@
                 };
                 restRequest('POST', { red: this.redOperation.id, blue: this.blueOperation.id }, render, '/plugin/gameboard/pieces');
             },
-            openModal(title, data = {}) {
+            resetTables() {
+                this.exchanges = {
+                    red: [],
+                    blue: []
+                };
+                this.stats = {
+                    true_pos: 0,
+                    false_pos: 0,
+                    false_neg: 0,
+                };
+            },
+            openModal(title, data) {
                 this.modal.title = title;
-                this.modal.content = data;
+                if (data) this.modal.content = data;
                 this.modal.isOpen = true;
             },
             updateStats(exchanges) {
@@ -270,6 +290,8 @@
                 console.log('create analytic', analytic)
                 const handleAnalyticCallback = (data) => {
                     console.log('analytic data', data)
+                    this.modal.isOpen = false;
+                    toast('Custom analytic created; Operation started.', true);
                 };
                 restRequest('POST', analytic, handleAnalyticCallback, '/plugin/gameboard/analytic');
                 // resetAnalyticOpModal()
@@ -284,20 +306,25 @@
     #gameboardPage .is-red-team {
         color: #BF1414;
     }
+
     #gameboardPage .is-blue-team {
         color: #4444D8;
     }
 
-    #gameboardPage .facts-link {
+    #gameboardPage button.is-blue-team {
+        background-color: #4444D8;
         color: white;
+    }
+
+    #gameboardPage .facts-link {
         line-height: 1.5em;
         border: none;
         background-color: transparent;
         font-size: 1em;
+        text-decoration: underline;
     }
 
     #gameboardPage .facts-link:hover {
-        text-decoration: underline;
         cursor: pointer;
     }
 
