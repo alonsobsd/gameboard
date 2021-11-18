@@ -252,9 +252,6 @@
                 <footer class="modal-card-foot">
                     <nav class="level">
                         <div class="level-left">
-                            <template x-if="access === 'red' && modal.title === 'Facts'">
-                                <button class="button is-small" @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic</button>
-                            </template>
                             <template x-if="access === 'red' && modal.title !== 'Analytic'">
                                 <div class="level-item">
                                     <button class="button is-small" @click="modal.isOpen = false">Close</button>
@@ -262,6 +259,9 @@
                             </template>
                         </div>
                         <div class="level-right">
+                            <template x-if="access === 'red' && modal.title === 'Facts'">
+                                <button class="button is-small is-primary" @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic</button>
+                            </template>
                             <template x-if="modal.title === 'Analytic'">
                                 <button class="button is-small is-primary" @click="createAnalytic(analytic)">Save</button>
                             </template>
@@ -277,7 +277,6 @@
 </div>
 
 <script>
-
     function alpineGameboard() {
         return {
             redOps: {{ red_ops | tojson }},
