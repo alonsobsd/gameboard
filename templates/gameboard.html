@@ -48,6 +48,9 @@
                         </div>
                         <label x-bind:class="blueOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
                                class="is-size-6 m-2" for="blue-op-select" x-text="blueOperation.state"></label>
+                        <template x-if="exchanges.blue.length > 0">
+                            <button x-on:click="openModal('Add External Detection', null)" class="button is-primary is-blue-team is-small mt-3">Add External Detection</button>
+                        </template>
                     </div>
                 </th>
                 <td>
@@ -90,11 +93,6 @@
             </template>
             <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
-                <template x-if="exchanges.blue.length > 0">
-                    <tr>
-                        <td colspan="4" class="has-text-right"><button x-on:click="openModal('Add External Detection', null)" class="button is-primary is-blue-team is-small mr-6">Add External Detection</button></td>
-                    </tr>
-                </template>
                 <template x-for="(redOp, e_index) in exchanges.red" :key="'ex-'+e_index">
                     <tr class="m-2">
                         <td class="is-flex is-flex-direction-column is-align-items-center m-3">
@@ -121,7 +119,7 @@
                     <p class="modal-card-title" x-text="modal.title"></p>
                 </header>
                 <section class="modal-card-body">
-                    <template x-if="modal.title === 'Analytic'">
+                    <template x-if="modal.title.includes('Analytic')">
                         <div>
                             <div class="modal-form">
                                 <div>
@@ -216,7 +214,7 @@
                             </div>
                         </div>
                     </template>
-                    <template x-if="modal.title === 'Facts' && modal.content">
+                    <template x-if="modal.title.includes('Facts') && modal.content">
                         <div>
                             <p x-text="modal.content.ability.name"></p>
                             <p class="is-italic" x-text="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name"></p>
@@ -236,17 +234,22 @@
                 <footer class="modal-card-foot">
                     <nav class="level">
                         <div class="level-left">
-                            <template x-if="modal.title !== 'Analytic'">
+                            <template x-if="!modal.title.includes('Facts')">
+                                <div class="level-item">
+                                    <button class="button is-small" @click="modal.isOpen = false">Cancel</button>
+                                </div>
+                            </template>
+                            <template x-if="modal.title.includes('Facts')">
                                 <div class="level-item">
                                     <button class="button is-small" @click="modal.isOpen = false">Close</button>
                                 </div>
                             </template>
                         </div>
                         <div class="level-right">
-                            <template x-if="access === 'red' && modal.title === 'Facts'">
+                            <template x-if="access === 'red' && modal.title.includes('Facts')">
                                 <button class="button is-small is-primary" @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic</button>
                             </template>
-                            <template x-if="modal.title === 'Analytic'">
+                            <template x-if="modal.title.includes('Analytic')">
                                 <button class="button is-small is-primary" @click="createAnalytic(analytic)">Save</button>
                             </template>
                             <template x-if="modal.title.includes('Detection')">
