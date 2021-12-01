@@ -94,14 +94,16 @@
             <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <template x-for="(redOp, e_index) in exchanges.red" :key="'ex-'+e_index">
-                    <tr class="m-2">
-                        <td class="is-flex is-flex-direction-column is-align-items-center m-3">
-                            <button x-on:click="openModal('Facts', redOp)" class="facts-link is-red-team" x-text="redOp.ability.name"></button>
-                            <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
-                            <span class="is-italic has-text-grey-light" x-text="redOp.paw"></span>
+                    <tr class="m-2" x-bind:style="{'background-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }">
+                        <td>
+                            <div class="is-flex is-flex-direction-column is-align-items-center p-3">
+                                <button x-on:click="openModal('Facts', redOp)" class="facts-link is-red-team" x-text="redOp.ability.name"></button>
+                                <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
+                                <span class="is-italic has-text-grey-light" x-text="redOp.paw"></span>
+                            </div>
                         </td>
-                        <td class="is-size-2 is-red-team mt-1" x-text="redOp.points.value" title="redOp.points.reason"></td>
-                        <td class="is-size-2 is-blue-team" x-text="exchanges.blue[e_index]?.points.value"></td>
+                        <td class="is-size-2 is-red-team has-background-black" x-text="redOp.points.value"></td>
+                        <td class="is-size-2 is-blue-team has-background-black" x-text="exchanges.blue[e_index]?.points.value"></td>
                         <td class="is-blue-team" x-text="exchanges.blue[e_index]?.points.reason"></td>
                     </tr>
                 </template>
