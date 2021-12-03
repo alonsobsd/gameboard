@@ -30,6 +30,36 @@
                                class="is-size-6 m-2" for="red-op-select" x-text="redOperation.state"></label>
                     </div>
                 </th>
+                <td colspan="2">
+                    <div class="is-flex is-flex-direction-column is-align-items-center mb-3">
+                        <table class="table stats-table">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th><i class="fas fa-plus"></i></th>
+                                <th><i class="fas fa-minus"></i></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <th>True</th>
+                                <td title="True Positive" class="is-blue-team has-background-black" x-text="stats.true_pos + '%'"></td>
+                                <td title="True Negative" class="is-blue-team has-background-black">0%</td>
+                            </tr>
+                            <tr>
+                                <th>False</th>
+                                <td title="False Positive" class="is-red-team has-background-black" x-text="stats.false_pos + '%'"></td>
+                                <td title="False Negative" class="is-red-team has-background-black" x-text="stats.false_neg + '%'"></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div>
+                            <button class="ml-2 button is-primary is-small" x-on:click="openModal('Analytic')">
+                                <i class="pr-1 fas fa-pencil-alt"></i>Custom Analytic
+                            </button>
+                        </div>
+                    </div>
+                </td>
                 <th colspan="2">
                     <div class="is-flex is-flex-direction-column is-align-items-center">
                         <div class="is-flex is-flex-direction-row">
@@ -53,58 +83,27 @@
                         </template>
                     </div>
                 </th>
-                <td>
-                    <div class="is-flex is-flex-direction-column is-align-items-center mb-3">
-                        <h3>Stats</h3>
-                        <table class="table stats-table">
-                            <thead>
-                            <tr>
-                                <th></th>
-                                <th><i class="fas fa-plus"></i></th>
-                                <th><i class="fas fa-minus"></i></th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <th>True</th>
-                                <td class="is-blue-team" x-text="stats.true_pos + '%'"></td>
-                                <td class="is-blue-team">0%</td>
-                            </tr>
-                            <tr>
-                                <th>False</th>
-                                <td class="is-red-team" x-text="stats.false_pos + '%'"></td>
-                                <td class="is-red-team" x-text="stats.false_neg + '%'"></td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <div>
-                            <button class="ml-2 button is-primary is-small" x-on:click="openModal('Analytic')">
-                                <i class="pr-1 fas fa-pencil-alt"></i>Custom Analytic
-                            </button>
-                        </div>
-                    </div>
-                </td>
             </tr>
             </thead>
             <template x-if="exchanges.blue.length < 1 && exchanges.red.length < 1">
                 <tbody>
-                <tr><td colspan="4" class="is-italic has-text-centered">No exchanges to show.</td></tr>
+                <tr><td colspan="6" class="is-italic has-text-centered">No exchanges to show.</td></tr>
                 </tbody>
             </template>
             <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <template x-for="(redOp, e_index) in exchanges.red" :key="'ex-'+e_index">
-                    <tr class="m-2" x-bind:style="{'background-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }">
-                        <td>
-                            <div class="is-flex is-flex-direction-column is-align-items-center p-3">
+                    <tr class="m-2">
+                        <td colspan="2" class="has-background-grey-darker">
+                            <div class="is-flex is-flex-direction-column is-align-items-center">
                                 <button x-on:click="openModal('Facts', redOp)" class="facts-link is-red-team" x-text="redOp.ability.name"></button>
                                 <span class="has-text-grey-light" x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
                                 <span class="is-italic has-text-grey-light" x-text="redOp.paw"></span>
                             </div>
                         </td>
-                        <td class="is-size-2 is-red-team has-background-black" x-text="redOp.points.value"></td>
-                        <td class="is-size-2 is-blue-team has-background-black" x-text="exchanges.blue[e_index]?.points.value"></td>
-                        <td class="is-blue-team" x-text="exchanges.blue[e_index]?.points.reason"></td>
+                        <td colspan="1" class="is-size-2 is-red-team has-background-black points-container" x-bind:style="{'border-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }" x-text="redOp.points.value"></td>
+                        <td colspan="1" class="is-size-2 is-blue-team has-background-black points-container" x-bind:style="{'border-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }" x-text="exchanges.blue[e_index]?.points.value"></td>
+                        <td colspan="2" class="is-blue-team has-background-grey-darker" x-text="exchanges.blue[e_index]?.points.reason"></td>
                     </tr>
                 </template>
                 </tbody>
@@ -409,6 +408,12 @@
     #gameboardPage button.is-blue-team {
         background-color: #4444D8;
         color: white;
+    }
+
+    #gameboardPage .points-container {
+        border-width: 2px;
+        border-style: solid;
+        border-radius: 2px;
     }
 
     #gameboardPage .facts-link {
