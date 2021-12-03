@@ -101,8 +101,8 @@
                                 <span class="is-italic has-text-grey-light" x-text="redOp.paw"></span>
                             </div>
                         </td>
-                        <td colspan="1" class="is-size-2 is-red-team has-background-black points-container" x-bind:style="{'border-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }" x-text="redOp.points.value"></td>
-                        <td colspan="1" class="is-size-2 is-blue-team has-background-black points-container" x-bind:style="{'border-color': (exchanges.blue[e_index]?.points.value < redOp.points.value) ? '#bf15141c' : '#0014ff0d' }" x-text="exchanges.blue[e_index]?.points.value"></td>
+                        <td colspan="1" class="is-size-2 is-red-team has-background-black points-container" x-bind:style="{'border-color': getWinningTeam(exchanges.blue[e_index]?.points.value, redOp.points.value).color}" x-text="redOp.points.value"></td>
+                        <td colspan="1" class="is-size-2 is-blue-team has-background-black points-container" x-bind:style="{'border-color': getWinningTeam(exchanges.blue[e_index]?.points.value, redOp.points.value).color}" x-text="exchanges.blue[e_index]?.points.value"></td>
                         <td colspan="2" class="is-blue-team has-background-grey-darker" x-text="exchanges.blue[e_index]?.points.reason"></td>
                     </tr>
                 </template>
@@ -267,9 +267,6 @@
 <script>
     function alpineGameboard() {
         return {
-            redOps: {{ red_ops | tojson }},
-            blueOps: {{ blue_ops | tojson }},
-            allTactics: {{ tactics | tojson }},
             redOperation: {
                 id: '',
                 state: '',
@@ -389,7 +386,24 @@
                     toast('Custom analytic created; Operation started.', true);
                 };
                 restRequest('POST', analytic, handleAnalyticCallback, '/plugin/gameboard/analytic');
-            }
+            },
+            getWinningTeam(blueScore, redScore) {
+                let winningTeamName = null;
+                let winningTeamColor = 'transparent';
+
+                if (blueScore < redScore) {
+                    winningTeamName = 'red';
+                    winningTeamColor = '#BF1414';
+                } else if (redScore < blueScore) {
+                    winningTeamName = 'blue';
+                    winningTeamColor = '#4444D8';
+                }
+
+                return { name: winningTeamName, color: winningTeamColor };
+            },
+            redOps: {{ red_ops | tojson }},
+            blueOps: {{ blue_ops | tojson }},
+            allTactics: {{ tactics | tojson }},
         };
     }
 
@@ -411,8 +425,8 @@
     }
 
     #gameboardPage .points-container {
-        border-width: 2px;
-        border-style: solid;
+        border-width: 2px !important;
+        border-style: solid !important;
         border-radius: 2px;
     }
 
