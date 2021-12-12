@@ -121,11 +121,6 @@
             <template
                     x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
-                <tr>
-                    <td colspan="3"></td>
-                    <td colspan="1" class="has-text-centered"><div class="has-background-black-ter points-card has-text-centered px-5 py-3 is-size-6">Process ID</div></td>
-                    <td colspan="3"></td>
-                </tr>
                 <template x-for="(exchange, index) in dataExchanges" :key="'exchange-'+index">
                     <tr class="m-2">
                         <!--RED TEAM COLUMN-->
@@ -150,7 +145,10 @@
                             </template>
                         </td>
                         <td colspan="1" class="process-column">
-                            <div title="Process ID" class="has-background-black-ter points-card has-text-centered px-5 py-3 is-size-6" x-text="exchange[0]"></div>
+                            <div title="Process ID" class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
+                                <p class="mb-0 is-size-7">pid</p>
+                                <p class="is-italic is-size-6" x-text="exchange[0]"></p>
+                            </div>
                         </td>
                         <!--BLUE POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-blue-team">
