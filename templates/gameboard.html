@@ -146,8 +146,8 @@
                         </td>
                         <td colspan="1" class="process-column">
                             <div title="Process ID" class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
-                                <p class="mb-0 is-size-7">pid</p>
-                                <p class="is-italic is-size-6" x-text="exchange[0]"></p>
+                                <p class="mb-0 is-size-7 has-background-black-ter">pid</p>
+                                <p class="is-italic is-size-6 has-background-black-ter" x-text="exchange[0]"></p>
                             </div>
                         </td>
                         <!--BLUE POINTS COLUMN-->
@@ -178,7 +178,7 @@
     <template x-if="modal.isOpen">
         <div class="modal is-active">
             <div class="modal-background" @click="modal.isOpen = false"></div>
-            <div class="modal-card" x-data="{analytic: {name: '', query: ''}}">
+            <div class="modal-card" x-data="{analytic: {name: '', query: ''}, expandQueries: false}">
                 <header class="modal-card-head">
                     <p class="modal-card-title" x-text="modal.title"></p>
                 </header>
@@ -282,21 +282,50 @@
                     </template>
                     <template x-if="modal.title.includes('Facts') && modal.content">
                         <div>
-                            <p x-text="modal.content.ability.name"></p>
-                            <p class="is-italic"
-                               x-text="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name"></p>
-                            <p class="is-italic"
-                               x-text="modal.content.points.value + ' points: ' + modal.content.points.reason "></p>
-                            <p x-show="modal.content.command"
-                               x-text="'Command: '+ b64DecodeUnicode(modal.content.command)"></p>
-                            <p x-show="modal.content.output" x-text="'Output: '+ modal.content.output"></p>
-                            <template x-if="access === 'red'">
-                                <p class="is-italic" x-show="modal.content.pid" x-text="'pid: '+ modal.content.pid"></p>
-                                <p x-text="modal.content.facts.length > 0 ? modal.content.facts : 'No facts.'"></p>
-                            </template>
-                            <template x-if="access === 'blue'">
-                                <p class="is-italic" x-show="modal.content.pin" x-text="'pin: '+ modal.content.pin"></p>
-                            </template>
+                            <div class="modal-form">
+                                <div>
+                                    <label for="fact-unique">Unique</label>
+                                    <div class="modal-form-fields">
+                                        <input class="input is-small" id="fact-unique"
+                                               x-bind:value="modal.content.unique" readonly>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="fact-command">Command</label>
+                                    <div class="modal-form-fields">
+                                        <input class="input is-small" id="fact-command"
+                                               x-bind:value="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name" readonly>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="fact-output">Output</label>
+                                    <div class="modal-form-fields" x-show="modal.content.output !== 'False'">
+                                        <input class="input is-small" id="fact-output"
+                                               x-model="modal.content.output" readonly>
+                                    </div>
+                                    <div class="modal-form-fields" x-show="modal.content.output === 'False'">
+                                        <input class="input is-italic is-small" id="fact-output"
+                                               x-bind:value="'No output'" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-form-group-header">
+                                <button type="button" class="button no-style heading pt-2"
+                                        x-on:click="expandQueries = !expandQueries"
+                                        x-bind:class="expandQueries ? 'expanded' : 'collapsed'">
+                                    <span>Suggested Queries</span>
+                                    <span class="navbar-divider"></span>
+                                </button>
+                            </div>
+                            <div class="modal-form" x-show="expandQueries">
+                                <div>
+                                    <label for="fact-queries">Queries</label>
+                                    <div class="modal-form-fields">
+                                        <input class="input is-small" id="fact-queries"
+                                               x-bind:value="'TODO'" readonly>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </section>
@@ -506,6 +535,28 @@
         color: #4444D8;
     }
 
+    #gameboardPage .process-column:before {
+        width: 2px;
+        height: 170px;
+        background-color: #242424;
+        content: "";
+        display: inline-block;
+        position: absolute;
+        margin-left: 47px;
+        margin-top: 49px;
+        z-index: 1;
+    }
+
+    #gameboardPage button.no-style {
+        background-color: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    #gameboardPage .process-column p {
+        z-index: 2;
+    }
+
     #gameboardPage .points-card {
         border-radius: 5px;
     }
@@ -513,7 +564,7 @@
     #gameboardPage .card {
         border-radius: 2px;
         color: white;
-        width: 75%;
+        width: 80%;
         height: 80px;
     }
 
@@ -524,6 +575,54 @@
     #gameboardPage button.is-blue-team, #gameboardPage .card.is-blue-team, #gameboardPage .points-container.is-blue-team {
         background-color: #4444D8;
         color: white;
+    }
+
+    #gameboardPage .points-container.is-red-team:before {
+        background-color: #ea1543;
+        content: "";
+        width: 52px;
+        height: 3px;
+        display: inline-block;
+        position: absolute;
+        margin-left: -58px;
+        margin-top: 2%;
+    }
+
+    /*PID left bar*/
+    #gameboardPage .process-column:after {
+        /*background-color: green;*/
+         background-color: #ea1543;
+        content: "";
+        width: 43px;
+        height: 3px;
+        display: inline-block;
+        position: absolute;
+        margin-left: -43px;
+        margin-top: -2%;
+    }
+
+    /*PID right bar*/
+    #gameboardPage .process-column:before {
+        /*background-color: orange;*/
+        background-color: #4444D8;
+        content: "";
+        width: 43px;
+        height: 3px;
+        display: inline-block;
+        position: absolute;
+        margin-left: 97px;
+        margin-top: 2%;
+    }
+
+    #gameboardPage .points-container.is-blue-team:before {
+        background-color: #4444D8;
+        content: "";
+        width: 52px;
+        height: 3px;
+        display: inline-block;
+        position: absolute;
+        margin-left: 47px;
+        margin-top: 2%;
     }
 
     #gameboardPage .points-container {
