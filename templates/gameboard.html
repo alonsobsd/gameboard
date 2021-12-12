@@ -357,8 +357,12 @@
                                 <div>
                                     <label for="fact-queries">Queries</label>
                                     <div class="modal-form-fields">
-                                        <input class="input is-small" id="fact-queries"
-                                               x-bind:value="'TODO'" readonly>
+                                        <code class="has-text-white m-2" id="fact-queries">
+                                            <template x-for="query in addSuggestedQueries(modal.content, access)">
+                                                <p class="is-small"
+                                                       x-text="query">
+                                            </template>
+                                        </code>
                                     </div>
                                 </div>
                             </div>
@@ -527,6 +531,7 @@
                 this.stats.false_pos = Math.round((F_P / total) * 100);
                 this.stats.false_neg = Math.round((F_N / total) * 100);
             },
+
             createAnalytic(analytic) {
                 const handleAnalyticCallback = (data) => {
                     this.modal.isOpen = false;
@@ -534,23 +539,67 @@
                 };
                 restRequest('POST', analytic, handleAnalyticCallback, '/plugin/gameboard/analytic');
             },
-            getWinningTeam(blueScore, redScore) {
-                let winningTeamName = null;
-                let winningTeamColor = 'transparent';
 
-                if (blueScore < redScore) {
-                    winningTeamName = 'red';
-                    winningTeamColor = '#BF1414';
-                } else if (redScore < blueScore) {
-                    winningTeamName = 'blue';
-                    winningTeamColor = '#4444D8';
-                }
+            // TODO: restRequest('POST', {'index':'result','link_id':link.id}, loadResults);
 
-                return {
-                    name: winningTeamName,
-                    color: winningTeamColor
-                };
+            addSuggestedQueries(link, opType) {
+                let queries = this.generateQueries(link, opType);
+                return queries;
             },
+
+            generateSpecific(field, value, finish, splunkQueries, elkQueries) {
+                splunkQueries.push(this.generateSplunkQuery(field, value, finish));
+                elkQueries.push(this.generateELKQuery(field, value));
+            },
+
+            generateQueries(link, opType) {
+                let queries = {};
+                let splunkQueries = [];
+                let elkQueries = [];
+                if (opType == 'blue') {
+                    this.generateSpecific('ProcessId', link.pin, link.finish, splunkQueries, elkQueries);
+                    link['facts'].forEach(function(fact) {
+                        if (fact.trait == 'host.process.guid') {
+                            generateSpecific('ProcessGuid', '"{' + fact.value + '}"', link.finish);
+                        }
+                        if (fact.trait == 'host.process.recordid') {
+                            this.generateSpecific('RecordNumber', fact.value, link.finish, splunkQueries, elkQueries);
+                        }
+                    })
+                }
+                else {
+                    this.generateSpecific('ProcessId', link.pid, link.finish, splunkQueries, elkQueries);
+                    this.generateSpecific('CommandLine', '"*' + b64DecodeUnicode(link.command).split(' ')[0] + '*"', link.finish, splunkQueries, elkQueries);
+                    if (link.executor.name == 'psh') {
+                        this.generateSpecific('CommandLine', '"*powershell*"', link.finish, splunkQueries, elkQueries);
+                    }
+                }
+                queries['Splunk'] = splunkQueries;
+                queries['ELK'] = elkQueries;
+                return queries;
+            },
+
+            generateSplunkQuery(field, value, finish) {
+                let earliest = this.incrementTime(finish, -5);
+                let latest = this.incrementTime(finish, 5);
+                return 'source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" ' + field + '=' + value + ' earliest="' + earliest + '" latest="' + latest + '" | table _time, Image, ProcessId, CommandLine, ParentProcessId, ParentProcessGuid, ParentCommandLine, User, Computer | sort _time';
+            },
+
+            incrementTime(finishTime, increment) {
+                let converted = new Date(finishTime);
+                converted.setSeconds(converted.getSeconds() + increment);
+                return this.formatSplunkTime(converted);
+            },
+
+            formatSplunkTime(time) {
+                let month = time.getMonth() + 1;
+                return month + '/' + time.getDate() + '/' + time.getFullYear() + ':' + time.toString().split(' ')[4];
+            },
+
+            generateELKQuery(field, value) {
+                return 'event_data.' + field + ': ' + value;
+            },
+
             redOps: {{ red_ops | tojson }},
             blueOps: {{ blue_ops | tojson }},
             allTactics: {{ tactics | tojson }},
