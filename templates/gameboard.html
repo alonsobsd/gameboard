@@ -38,7 +38,7 @@
                 </th>
 
                 <!--STATS TABLE-->
-                <td colspan="2">
+                <td colspan="3">
                     <div class="is-flex is-flex-direction-column is-align-items-center">
                         <table class="table stats-table my-5">
                             <thead>
@@ -114,46 +114,57 @@
             <template x-if="exchanges.blue.length < 1 && exchanges.red.length < 1">
                 <tbody>
                 <tr>
-                    <td colspan="6" class="is-italic has-text-centered">No exchanges to show.</td>
+                    <td colspan="7" class="is-italic has-text-centered">No exchanges to show.</td>
                 </tr>
                 </tbody>
             </template>
             <template
                     x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
-                <template x-for="(redOp, e_index) in exchanges.red" :key="'ex-'+e_index">
+                <tr>
+                    <td colspan="7" class="has-text-centered">Process ID</td>
+                </tr>
+                <template x-for="(exchange, index) in dataExchanges" :key="'exchange-'+index">
                     <tr class="m-2">
                         <!--RED TEAM COLUMN-->
                         <td colspan="2">
-                            <div class="is-flex is-justify-content-flex-end">
-                                <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card"
-                                     x-bind:class="access === 'red' ? 'is-red-team' : 'has-background-black-ter'">
-                                    <button x-on:click="openModal('Facts', redOp)" class="facts-link has-text-white"
-                                            x-text="redOp.ability.name"></button>
-                                    <span x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
-                                    <span class="is-italic" x-text="redOp.paw"></span>
-                                </div>
+                            <div x-show="exchange[1].red.length > 0" class="is-flex is-align-items-flex-end is-flex-direction-column">
+                                <template x-for="redOp in exchange[1].red">
+                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card my-2 has-text-centered"
+                                         x-bind:class="access === 'red' ? 'is-red-team' : 'has-background-black-ter'">
+                                        <button x-on:click="openModal('Facts', redOp)" class="facts-link has-text-white"
+                                                x-text="redOp.ability.name"></button>
+                                        <span x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
+                                        <span class="is-italic" x-text="redOp.paw"></span>
+                                    </div>
+                                </template>
                             </div>
                         </td>
                         <!--RED POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-red-team">
-                            <div x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"
-                                 class="is-red-team points-container p-2"></div>
+                            <template x-for="redOp in exchange[1].red">
+                                <div x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"
+                                     class="is-red-team points-container p-2 my-2"></div>
+                            </template>
                         </td>
-                        <td colspan="1">
-                            <div x-text="exchanges[e_index][0]"></div>
+                        <td colspan="1" class="process-column">
+                            <div title="Process ID" class="has-background-black-ter points-card has-text-centered px-5 py-3 is-size-6" x-text="exchange[0]"></div>
                         </td>
                         <!--BLUE POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-blue-team">
-                            <div x-text="exchanges.blue[e_index]?.points.value >= 0 ? '+'+exchanges.blue[e_index]?.points.value : exchanges.blue[e_index]?.points.value"
-                                 class="is-blue-team points-container p-2"></div>
+                            <template x-for="blueOp in exchange[1].blue">
+                                <div x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"
+                                     class="is-blue-team points-container p-2 my-2"></div>
+                            </template>
                         </td>
                         <!--BLUE TEAM COLUMN-->
                         <td colspan="2">
-                            <div class="is-flex is-justify-content-flex-start">
-                                <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card has-text-centered"
-                                     x-text="exchanges.blue[e_index]?.points.reason"
-                                     x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'"></div>
+                            <div x-show="exchange[1].blue.length > 0" class="is-flex is-justify-content-flex-start is-flex-direction-column">
+                                <template x-for="blueOp in exchange[1].blue">
+                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 my-2 card has-text-centered"
+                                         x-text="blueOp.points.reason"
+                                         x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'"></div>
+                                </template>
                             </div>
                         </td>
                     </tr>
@@ -502,7 +513,7 @@
     #gameboardPage .card {
         border-radius: 2px;
         color: white;
-        width: 70%;
+        width: 75%;
         height: 80px;
     }
 
