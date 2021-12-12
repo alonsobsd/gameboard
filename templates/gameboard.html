@@ -122,7 +122,9 @@
                     x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <tr>
-                    <td colspan="7" class="has-text-centered">Process ID</td>
+                    <td colspan="3"></td>
+                    <td colspan="1" class="has-text-centered"><div class="has-background-black-ter points-card has-text-centered px-5 py-3 is-size-6">Process ID</div></td>
+                    <td colspan="3"></td>
                 </tr>
                 <template x-for="(exchange, index) in dataExchanges" :key="'exchange-'+index">
                     <tr class="m-2">
