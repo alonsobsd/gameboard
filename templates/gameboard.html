@@ -145,10 +145,12 @@
                             </template>
                         </td>
                         <td colspan="1" class="process-column">
-                            <div title="Process ID" class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
-                                <p class="mb-0 is-size-7 has-background-black-ter">pid</p>
-                                <p class="is-italic is-size-6 has-background-black-ter" x-text="exchange[0]"></p>
-                            </div>
+                            <template x-if="exchange[1].red.length > 0 && exchange[1].blue.length > 0">
+                                <div title="Process ID" class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
+                                    <p class="mb-0 is-size-7 has-background-black-ter">pid</p>
+                                    <p class="is-italic is-size-6 has-background-black-ter" x-text="exchange[0]"></p>
+                                </div>
+                            </template>
                         </td>
                         <!--BLUE POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-blue-team">
@@ -535,15 +537,15 @@
         color: #4444D8;
     }
 
-    #gameboardPage .process-column:before {
+    #gameboardPage .process-column div p:first-child:before {
         width: 2px;
-        height: 170px;
+        height: 72px;
         background-color: #242424;
         content: "";
         display: inline-block;
         position: absolute;
-        margin-left: 47px;
-        margin-top: 49px;
+        margin-left: 7px;
+        margin-top: 42px;
         z-index: 1;
     }
 
@@ -589,20 +591,19 @@
     }
 
     /*PID left bar*/
-    #gameboardPage .process-column:after {
+    #gameboardPage .process-column div:after {
         /*background-color: green;*/
-         background-color: #ea1543;
+        background-color: #ea1543;
         content: "";
         width: 43px;
         height: 3px;
         display: inline-block;
         position: absolute;
-        margin-left: -43px;
-        margin-top: -2%;
+        margin-left: -67px;
     }
 
     /*PID right bar*/
-    #gameboardPage .process-column:before {
+    #gameboardPage .process-column div:before {
         /*background-color: orange;*/
         background-color: #4444D8;
         content: "";
@@ -610,8 +611,7 @@
         height: 3px;
         display: inline-block;
         position: absolute;
-        margin-left: 97px;
-        margin-top: 2%;
+        margin-left: 73px;
     }
 
     #gameboardPage .points-container.is-blue-team:before {
