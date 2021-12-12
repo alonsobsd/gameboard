@@ -118,8 +118,7 @@
                 </tr>
                 </tbody>
             </template>
-            <template
-                    x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
+            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <template x-for="(exchange, index) in dataExchanges" :key="'exchange-'+index">
                     <tr class="m-2">
@@ -128,11 +127,20 @@
                             <div x-show="exchange[1].red.length > 0" class="is-flex is-align-items-flex-end is-flex-direction-column">
                                 <template x-for="redOp in exchange[1].red">
                                     <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card my-2 has-text-centered"
+                                         x-on:click="openModal('Facts', redOp)"
                                          x-bind:class="access === 'red' ? 'is-red-team' : 'has-background-black-ter'">
-                                        <button x-on:click="openModal('Facts', redOp)" class="facts-link has-text-white"
+                                        <button class="facts-link has-text-white"
                                                 x-text="redOp.ability.name"></button>
-                                        <span x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
-                                        <span class="is-italic" x-text="redOp.paw"></span>
+                                        <template x-if="access === 'red'">
+                                            <div class="is-flex-direction-column is-flex align-center">
+                                                <span x-text="getHumanFriendlyTimeISO8601(redOp.finish)"></span>
+                                                <span class="is-italic" x-text="redOp.paw"></span>
+                                            </div>
+                                        </template>
+                                        <template x-if="access === 'blue'">
+                                            <span class="is-italic" x-text="redOp.ability.technique_id"></span>
+                                        </template>
+                                        <span x-show="access === 'red' && redOp.facts.length > 0" class="facts-star"><em class="fas fa-star"></em></span>
                                     </div>
                                 </template>
                             </div>
@@ -164,8 +172,20 @@
                             <div x-show="exchange[1].blue.length > 0" class="is-flex is-justify-content-flex-start is-flex-direction-column">
                                 <template x-for="blueOp in exchange[1].blue">
                                     <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 my-2 card has-text-centered"
-                                         x-text="blueOp.points.reason"
-                                         x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'"></div>
+                                         x-on:click="openModal('Facts', blueOp)"
+                                         x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'">
+                                        <template x-if="access === 'red'">
+                                            <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details'"></span>
+                                        </template>
+                                        <template x-if="access === 'blue'">
+                                            <div>
+                                                <span x-text="blueOp?.ability?.name"></span>
+                                                <span x-text="getHumanFriendlyTimeISO8601(blueOp?.finish)"></span>
+                                                <span class="is-italic" x-text="redOp.paw"></span>
+                                            </div>
+                                        </template>
+                                        <span x-show="access === 'blue' && blueOp?.facts?.length > 0" class="facts-star"><em class="fas fa-star"></em></span>
+                                    </div>
                                 </template>
                             </div>
                         </td>
@@ -285,31 +305,46 @@
                     <template x-if="modal.title.includes('Facts') && modal.content">
                         <div>
                             <div class="modal-form">
-                                <div>
-                                    <label for="fact-unique">Unique</label>
-                                    <div class="modal-form-fields">
-                                        <input class="input is-small" id="fact-unique"
-                                               x-bind:value="modal.content.unique" readonly>
+                                <template x-if="modal.content.unique">
+                                    <div>
+                                        <label for="fact-unique">Unique</label>
+                                        <div class="modal-form-fields">
+                                            <input class="input is-small" id="fact-unique"
+                                                   x-bind:value="modal.content.unique" readonly>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label for="fact-command">Command</label>
-                                    <div class="modal-form-fields">
-                                        <input class="input is-small" id="fact-command"
-                                               x-bind:value="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name" readonly>
+                                </template>
+                                <template x-if="modal.content.ability && modal.content.ability.technique_id">
+                                    <div>
+                                        <label for="fact-command">Command</label>
+                                        <div class="modal-form-fields">
+                                            <input class="input is-small" id="fact-command"
+                                                   x-bind:value="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name" readonly>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <label for="fact-output">Output</label>
-                                    <div class="modal-form-fields" x-show="modal.content.output !== 'False'">
-                                        <input class="input is-small" id="fact-output"
-                                               x-model="modal.content.output" readonly>
+                                </template>
+                                <template x-if="modal.content.output">
+                                    <div>
+                                        <label for="fact-output">Output</label>
+                                        <div class="modal-form-fields" x-show="modal.content.output !== 'False'">
+                                            <input class="input is-small" id="fact-output"
+                                                   x-model="modal.content.output" readonly>
+                                        </div>
+                                        <div class="modal-form-fields" x-show="modal.content.output === 'False'">
+                                            <input class="input is-italic is-small" id="fact-output"
+                                                   x-bind:value="'No output'" readonly>
+                                        </div>
                                     </div>
-                                    <div class="modal-form-fields" x-show="modal.content.output === 'False'">
-                                        <input class="input is-italic is-small" id="fact-output"
-                                               x-bind:value="'No output'" readonly>
+                                </template>
+                                <template x-if="modal.content.reason">
+                                    <div>
+                                        <label for="fact-reason">Reason</label>
+                                        <div class="modal-form-fields">
+                                            <input class="input is-small" id="fact-reason"
+                                                   x-model="modal.content.reason" readonly>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
                             <div class="modal-form-group-header">
                                 <button type="button" class="button no-style heading pt-2"
@@ -537,6 +572,12 @@
         color: #4444D8;
     }
 
+    #gameboardPage .facts-star {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+    }
+
     #gameboardPage .process-column div p:first-child:before {
         width: 2px;
         height: 72px;
@@ -564,9 +605,10 @@
     }
 
     #gameboardPage .card {
+        cursor: pointer;
         border-radius: 2px;
         color: white;
-        width: 80%;
+        width: 315px;
         height: 80px;
     }
 
