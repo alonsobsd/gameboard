@@ -13,14 +13,16 @@
             <tr>
                 <!--RED TEAM-->
                 <th colspan="2">
-                    <div class="is-flex is-flex-direction-column is-align-items-center">
+                    <div class="is-flex is-flex-direction-column is-align-items-flex-end">
+                        <div class="is-flex is-flex-direction-column is-align-items-center">
                         <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
                             <div><em class="fas fa-user pr-3 is-red-team is-size-2" alt="Red team"></em></div>
                             <div class="is-flex is-flex-direction-row is-size-1">
+                                <div x-text="redOperation.points < 0 ? '-' : ''"></div>
                                 <div class="points-card has-background-black-ter mr-2 py-1 px-2" alt="Red team points"
-                                     x-text="Math.floor(redOperation.points / 10)"></div>
+                                     x-text="Math.floor(Math.abs(redOperation.points / 10))"></div>
                                 <div class="points-card has-background-black-ter py-1 px-2" alt="Red team points"
-                                     x-text="redOperation.points % 10"></div>
+                                     x-text="Math.abs(redOperation.points % 10)"></div>
                             </div>
                         </div>
                         <label for="red-op-select" class="mb-1 is-size-7">Operation</label>
@@ -34,6 +36,7 @@
                         </div>
                         <label x-show="redOperation.state" x-bind:class="redOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
                                class="is-size-7 mt-2" for="red-op-select" x-text="'is ' + redOperation.state"></label>
+                    </div>
                     </div>
                 </th>
 
@@ -77,7 +80,8 @@
 
                 <!--BLUE TEAM-->
                 <th colspan="2">
-                    <div class="is-flex is-flex-direction-column is-align-items-center">
+                    <div class="is-flex is-flex-direction-column is-align-items-flex-start">
+                        <div class="is-flex is-flex-direction-column is-align-items-center">
                         <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
                             <div class="is-flex is-flex-direction-row is-size-1">
                                 <div x-text="blueOperation.points < 0 ? '-' : ''"></div>
@@ -106,6 +110,7 @@
                                 </button>
                             </div>
                         </template>
+                    </div>
                     </div>
                 </th>
             </tr>
@@ -622,7 +627,7 @@
     }
 
     #gameboardPage .is-blue-team {
-        color: #4444D8;
+        color: #4C4CF2;
     }
 
     #gameboardPage .modal-form-fields code {
@@ -676,7 +681,7 @@
     }
 
     #gameboardPage button.is-blue-team, #gameboardPage .card.is-blue-team, #gameboardPage .points-container.is-blue-team {
-        background-color: #4444D8;
+        background-color: #4C4CF2;
         color: white;
     }
 
@@ -704,7 +709,7 @@
 
     /*PID right bar*/
     #gameboardPage .process-column div:before {
-        background-color: #4444D8;
+        background-color: #4C4CF2;
         content: "";
         width: 43px;
         height: 3px;
@@ -714,7 +719,7 @@
     }
 
     #gameboardPage .points-container.is-blue-team:before {
-        background-color: #4444D8;
+        background-color: #4C4CF2;
         content: "";
         width: 52px;
         height: 3px;
@@ -737,6 +742,10 @@
         background-color: transparent;
         font-size: 1em;
         text-decoration: underline;
+    }
+
+    #gameboardPage .stats-table {
+        max-width: 100px;
     }
 
     #gameboardPage .stats-table th, #gameboardPage .stats-table td {
