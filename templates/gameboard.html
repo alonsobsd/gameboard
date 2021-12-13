@@ -619,12 +619,16 @@
 <style>
     #gameboardPage .is-red-team {
         color: #ea1543;
-        /*color: #d04249;*/
-        /*color: #BF1414;*/
     }
 
     #gameboardPage .is-blue-team {
         color: #4444D8;
+    }
+
+    #gameboardPage .modal-form-fields code {
+        overflow-y: scroll;
+        max-height: 500px;
+        word-break: break-word;
     }
 
     #gameboardPage .facts-star {
@@ -689,7 +693,6 @@
 
     /*PID left bar*/
     #gameboardPage .process-column div:after {
-        /*background-color: green;*/
         background-color: #ea1543;
         content: "";
         width: 43px;
@@ -701,7 +704,6 @@
 
     /*PID right bar*/
     #gameboardPage .process-column div:before {
-        /*background-color: orange;*/
         background-color: #4444D8;
         content: "";
         width: 43px;
@@ -735,10 +737,6 @@
         background-color: transparent;
         font-size: 1em;
         text-decoration: underline;
-    }
-
-    #gameboardPage .facts-link:hover {
-        cursor: pointer;
     }
 
     #gameboardPage .stats-table th, #gameboardPage .stats-table td {
