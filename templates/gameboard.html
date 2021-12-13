@@ -101,7 +101,7 @@
                                class="is-size-7 mt-2" for="blue-op-select" x-text="'is ' + blueOperation.state"></label>
                         <template x-if="exchanges.blue.length > 0">
                             <div>
-                                <button x-on:click="openModal('Add External Detection', null)"
+                                <button x-on:click="openModal('Add External Detection')"
                                         class="button is-primary is-blue-team is-small mt-3"><em class="pr-1 fas fa-plus"></em>External Detection
                                 </button>
                             </div>
@@ -174,11 +174,11 @@
                                          x-on:click="openModal('Facts', blueOp)"
                                          x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'">
                                         <template x-if="access === 'red'">
-                                            <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details'"></span>
+                                            <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
                                         </template>
                                         <template x-if="access === 'blue'">
                                             <div class="is-flex is-flex-direction-column is-align-items-center">
-                                                <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details'"></span>
+                                                <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
                                                 <span x-text="blueOp.finish ? getHumanFriendlyTimeISO8601(blueOp?.finish) : ''"></span>
                                                 <span class="is-italic" x-text="blueOp?.paw"></span>
                                             </div>
@@ -301,7 +301,7 @@
                             </div>
                         </div>
                     </template>
-                    <template x-if="modal.title.includes('Facts') && modal.content">
+                    <template x-if="modal.title.includes('Facts') && modal.content && modal.content.unique">
                         <div>
                             <div class="modal-form">
                                 <template x-if="modal.content.unique">
@@ -313,12 +313,12 @@
                                         </div>
                                     </div>
                                 </template>
-                                <template x-if="modal.content.ability && modal.content.ability.technique_id && modal.content.ability.technique_name">
-                                    <div>
+                                <template x-if="modal.content !== {} && modal.content.ability && modal.content.ability.technique_id && modal.content.ability.technique_name">
+                                    <div x-data="{concatName: modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name}">
                                         <label for="fact-command">Command</label>
                                         <div class="modal-form-fields">
                                             <input class="input is-small" id="fact-command"
-                                                   x-bind:value="modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name" readonly>
+                                                   x-bind:value="concatName" readonly>
                                         </div>
                                     </div>
                                 </template>
@@ -353,19 +353,28 @@
                                     <span class="navbar-divider"></span>
                                 </button>
                             </div>
-                            <div class="modal-form" x-show="expandQueries">
-                                <div>
-                                    <label for="fact-queries">Queries</label>
-                                    <div class="modal-form-fields">
-                                        <code class="has-text-white m-2" id="fact-queries">
-                                            <template x-for="query in addSuggestedQueries(modal.content, access)">
-                                                <p class="is-small"
-                                                       x-text="query">
-                                            </template>
-                                        </code>
+                            <div class="modal-form" x-show="expandQueries" x-data="{generatedQueries: generateQueries(modal.content, access)}">
+                                <template x-if="generatedQueries && typeof generatedQueries === 'object'">
+                                    <div>
+                                        <label for="fact-queries">Queries</label>
+                                        <div class="modal-form-fields">
+                                            <code class="has-text-white m-2" id="fact-queries">
+                                                <template x-for="(query, index) in generatedQueries" :key="'query-'+index">
+                                                    <p class="is-small" x-text="query">
+                                                </template>
+                                            </code>
+                                        </div>
                                     </div>
-                                </div>
+                                </template>
                             </div>
+                        </div>
+                    </template>
+                    <template x-if="modal.title.includes('Facts') && modal.content && !modal.content.unique">
+                        <div>
+                            <template x-if="modal.content.reason">
+                                <p x-text="'Reason: ' + modal.content.reason"></p>
+                            </template>
+                            <p class="is-italic">No other details to show.</p>
                         </div>
                     </template>
                 </section>
@@ -386,7 +395,7 @@
                         <div class="level-right">
                             <template x-if="access === 'red' && modal.title.includes('Facts')">
                                 <button class="button is-small is-primary"
-                                        @click="modal.isOpen = false; openModal('Analytic', null)">Create Analytic
+                                        @click="modal.isOpen = false; openModal('Analytic')">Create Analytic
                                 </button>
                             </template>
                             <template x-if="modal.title.includes('Analytic')">
@@ -510,7 +519,7 @@
                     false_neg: 0,
                 };
             },
-            openModal(title, data) {
+            openModal(title, data = {}) {
                 this.modal.title = title;
                 if (data) this.modal.content = data;
                 this.modal.isOpen = true;
@@ -542,47 +551,42 @@
 
             // TODO: restRequest('POST', {'index':'result','link_id':link.id}, loadResults);
 
-            addSuggestedQueries(link, opType) {
-                let queries = this.generateQueries(link, opType);
-                return queries;
-            },
-
             generateSpecific(field, value, finish, splunkQueries, elkQueries) {
                 splunkQueries.push(this.generateSplunkQuery(field, value, finish));
                 elkQueries.push(this.generateELKQuery(field, value));
             },
 
             generateQueries(link, opType) {
-                let queries = {};
+                if (!link || !opType) return {};
                 let splunkQueries = [];
                 let elkQueries = [];
-                if (opType == 'blue') {
+                if (opType === 'blue') {
                     this.generateSpecific('ProcessId', link.pin, link.finish, splunkQueries, elkQueries);
-                    link['facts'].forEach(function(fact) {
-                        if (fact.trait == 'host.process.guid') {
-                            generateSpecific('ProcessGuid', '"{' + fact.value + '}"', link.finish);
+                    link.facts.forEach((fact) => {
+                        if (fact.trait === 'host.process.guid') {
+                            this.generateSpecific('ProcessGuid', `"{ ${fact.value} }"`, link.finish);
                         }
-                        if (fact.trait == 'host.process.recordid') {
+                        if (fact.trait === 'host.process.recordid') {
                             this.generateSpecific('RecordNumber', fact.value, link.finish, splunkQueries, elkQueries);
                         }
-                    })
-                }
-                else {
+                    });
+                } else {
                     this.generateSpecific('ProcessId', link.pid, link.finish, splunkQueries, elkQueries);
-                    this.generateSpecific('CommandLine', '"*' + b64DecodeUnicode(link.command).split(' ')[0] + '*"', link.finish, splunkQueries, elkQueries);
-                    if (link.executor.name == 'psh') {
+                    this.generateSpecific('CommandLine', `"* ${b64DecodeUnicode(link.command).split(' ')[0]} *"`, link.finish, splunkQueries, elkQueries);
+                    if (link.executor.name === 'psh') {
                         this.generateSpecific('CommandLine', '"*powershell*"', link.finish, splunkQueries, elkQueries);
                     }
                 }
-                queries['Splunk'] = splunkQueries;
-                queries['ELK'] = elkQueries;
-                return queries;
+                return {
+                    Splunk: splunkQueries,
+                    ELK: elkQueries
+                };
             },
 
             generateSplunkQuery(field, value, finish) {
                 let earliest = this.incrementTime(finish, -5);
                 let latest = this.incrementTime(finish, 5);
-                return 'source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" ' + field + '=' + value + ' earliest="' + earliest + '" latest="' + latest + '" | table _time, Image, ProcessId, CommandLine, ParentProcessId, ParentProcessGuid, ParentCommandLine, User, Computer | sort _time';
+                return `source="XmlWinEventLog:Microsoft-Windows-Sysmon/Operational" ${field} = ${value} earliest="${earliest}" latest="${latest}" | table _time, Image, ProcessId, CommandLine, ParentProcessId, ParentProcessGuid, ParentCommandLine, User, Computer | sort _time`;
             },
 
             incrementTime(finishTime, increment) {
@@ -592,12 +596,11 @@
             },
 
             formatSplunkTime(time) {
-                let month = time.getMonth() + 1;
-                return month + '/' + time.getDate() + '/' + time.getFullYear() + ':' + time.toString().split(' ')[4];
+                return `${time.getMonth() + 1}/${time.getDate()}/${time.getFullYear()}:${time.toString().split(' ')[4]}`;
             },
 
             generateELKQuery(field, value) {
-                return 'event_data.' + field + ': ' + value;
+                return `event_data.${field}: ${value}`;
             },
 
             redOps: {{ red_ops | tojson }},
