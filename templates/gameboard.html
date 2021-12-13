@@ -152,8 +152,10 @@
                         <!--RED POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-red-team">
                             <template x-for="redOp in exchange[1].red">
-                                <div x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"
-                                     class="is-red-team points-container p-2 my-2"></div>
+                                <div class="is-red-team points-container p-2 my-2">
+                                    <span class="points-text" x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
+                                    <span class="points-line is-red-team"></span>
+                                </div>
                             </template>
                         </td>
                         <td colspan="1" class="process-column">
@@ -167,8 +169,10 @@
                         <!--BLUE POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-blue-team">
                             <template x-for="blueOp in exchange[1].blue">
-                                <div x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"
-                                     class="is-blue-team points-container p-2 my-2"></div>
+                                <div class="is-blue-team points-container p-2 my-2">
+                                    <span class="points-text" x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"></span>
+                                    <span class="points-line is-blue-team"></span>
+                                </div>
                             </template>
                         </td>
                         <!--BLUE TEAM COLUMN-->
@@ -674,59 +678,50 @@
         color: white;
         width: 315px;
         height: 80px;
+        z-index: 2;
     }
 
     #gameboardPage .card.is-red-team, #gameboardPage .points-container.is-red-team {
         background-color: #ea1543;
+        z-index: 2;
     }
 
     #gameboardPage button.is-blue-team, #gameboardPage .card.is-blue-team, #gameboardPage .points-container.is-blue-team {
         background-color: #4C4CF2;
         color: white;
+        z-index: 2;
     }
 
-    #gameboardPage .points-container.is-red-team:before {
-        background-color: #ea1543;
-        content: "";
-        width: 44px;
-        height: 3px;
-        display: inline-block;
-        position: absolute;
-        margin-left: -53px;
-        margin-top: 2%;
+    #gameboardPage .points-text {
+        z-index: 2;
     }
 
-    /*PID left bar*/
-    #gameboardPage .process-column div:after {
-        background-color: #ea1543;
-        content: "";
-        width: 43px;
-        height: 3px;
-        display: inline-block;
-        position: absolute;
-        margin-left: -67px;
+    #gameboardPage .points-line {
+        z-index: 1;
     }
 
-    /*PID right bar*/
-    #gameboardPage .process-column div:before {
-        background-color: #4C4CF2;
+    #gameboardPage .points-line.is-red-team:after {
+        background: #ea1543;
         content: "";
-        width: 43px;
+        width: 7%;
         height: 3px;
-        display: inline-block;
+        display: flex;
         position: absolute;
-        margin-left: 73px;
+        margin-left: -7.3%;
+        margin-top: -1.5%;
+        z-index: 1;
     }
 
-    #gameboardPage .points-container.is-blue-team:before {
-        background-color: #4C4CF2;
+    #gameboardPage .points-line.is-blue-team:after {
+        background: #4C4CF2;
         content: "";
-        width: 52px;
+        width: 7%;
         height: 3px;
-        display: inline-block;
+        display: flex;
         position: absolute;
-        margin-left: 47px;
-        margin-top: 2%;
+        margin-left: 3.3%;
+        margin-top: -1.5%;
+        z-index: 1;
     }
 
     #gameboardPage .points-container {
