@@ -277,34 +277,27 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="is-flex is-flex-direction-row is-justify-content-center is-align-items-center width-100">
-                                    <label class="is-hidden" for="detection-id-input">Detect-by ID</label>
-                                    <div class="toggleContainer mt-2 ml-6">
-                                        <label for="toggleDetectionID">
-                                            <span class="has-tooltip-multiline has-tooltip-right"
-                                                  data-tooltip="In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.">pid</span>
-                                        </label>
-                                        <div class="toggleSwitch mx-2">
-                                            <input type="checkbox"
-                                                   id="toggleDetectionID"
-                                                   x-model="detectByGuid"
-                                                   x-bind:checked="Boolean(detectByGuid) ? 'checked' : null"/>
-                                            <span class="toggleSlider toggleSliderRound"
-                                                  title="Toggle between detection with guid and pid"
-                                                  x-on:click="detectByGuid = (detectByGuid === 0 ? 1 : 0);"
-                                                  x-bind:class="Boolean(detectByGuid) ? 'toggle-on' : 'toggle-off'">
-                                                    <span x-bind:class="Boolean(detectByGuid) ? 'toggle-slider-on' : 'toggle-slider-off'"></span>
-                                                </span>
-                                        </div>
-                                        <label for="toggleDetectionID">
-                                            <span class="has-tooltip-multiline"
-                                                  data-tooltip="In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.">guid</span>
-                                        </label>
+                                <div>
+                                    <label for="detection-id-input">
+                                        <span class="has-tooltip-multiline has-tooltip-right"
+                                              data-tooltip="In order to add a manual Sysmon GUID detection, a blue agent must have been running on the target system during the red operation.">
+                                        Detect-by ID
+                                        </span>
+                                    </label>
+                                    <div class="modal-form-fields pl-2" id="detection-id-choice">
+                                        <input type="radio" id="detection-by-pid"
+                                               x-model="detectByGuid" value="0" checked>
+                                        <label for="detection-by-pid">pid</label>
+                                        <input type="radio" id="detection-by-guid"
+                                               x-model="detectByGuid" value="1">
+                                        <label for="detection-by-guid">guid</label>
                                     </div>
+                                </div>
+                                <div>
+                                    <label x-show="detectByGuid == 0" for="detection-id-choice">pid</label>
+                                    <label x-show="detectByGuid == 1" for="detection-id-choice">guid</label>
                                     <div class="modal-form-fields">
-                                        <input id="detection-id-input"
-                                               class="mt-4 ml-4"
-                                               x-model="detectionID">
+                                        <input id="detection-id-input" class="mt-4 ml-4" x-model="detectionID">
                                     </div>
                                 </div>
                             </div>
@@ -345,15 +338,6 @@
                                         </div>
                                     </div>
                                 </template>
-                                <template x-if="modal.content.reason">
-                                    <div>
-                                        <label for="fact-reason">Reason</label>
-                                        <div class="modal-form-fields">
-                                            <input class="input is-small" id="fact-reason"
-                                                   x-model="modal.content.reason" readonly>
-                                        </div>
-                                    </div>
-                                </template>
                             </div>
                             <div class="modal-form-group-header">
                                 <button type="button" class="button no-style heading pt-2"
@@ -364,27 +348,42 @@
                                 </button>
                             </div>
                             <div class="modal-form" x-show="expandQueries" x-data="{generatedQueries: generateQueries(modal.content, access)}">
-                                <template x-if="generatedQueries && typeof generatedQueries === 'object'">
+                                <template x-if="generatedQueries && generatedQueries.ELK?.length > 0">
                                     <div>
-                                        <label for="fact-queries">Queries</label>
-                                        <div class="modal-form-fields">
-                                            <code class="has-text-white m-2" id="fact-queries">
-                                                <template x-for="(query, index) in generatedQueries" :key="'query-'+index">
-                                                    <p class="is-small" x-text="query">
-                                                </template>
-                                            </code>
+                                        <label for="fact-elk-queries" class="is-align-items-flex-start mt-3">ELK Queries</label>
+                                        <div class="modal-form-fields" id="fact-elk-queries">
+                                            <template x-for="(query, index) in generatedQueries.ELK" :key="'query-elk-'+index">
+                                                <code class="has-text-white m-2" x-text="query">
+                                                </code>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="generatedQueries && generatedQueries.Splunk?.length > 0">
+                                    <div>
+                                        <label for="fact-splunk-queries" class="is-align-items-flex-start mt-3">Splunk Queries</label>
+                                        <div class="modal-form-fields" id="fact-splunk-queries">
+                                            <template x-for="(query, index) in generatedQueries.Splunk" :key="'query-splunk-'+index">
+                                                <code class="has-text-white m-2" x-text="query">
+                                                </code>
+                                            </template>
                                         </div>
                                     </div>
                                 </template>
                             </div>
                         </div>
                     </template>
-                    <template x-if="modal.title.includes('Facts') && modal.content && !modal.content.unique">
+                    <template x-if="modal?.content?.points?.reason">
                         <div>
-                            <template x-if="modal.content.reason">
-                                <p x-text="'Reason: ' + modal.content.reason"></p>
-                            </template>
-                            <p class="is-italic">No other details to show.</p>
+                            <div class="modal-form">
+                                <div>
+                                    <label for="fact-reason">Reason</label>
+                                    <div class="modal-form-fields">
+                                        <input class="input is-small" id="fact-reason"
+                                               x-bind:value="modal?.content?.points?.reason" readonly>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </template>
                 </section>
@@ -569,10 +568,6 @@
                 };
                 restRequest('POST', analytic, handleAnalyticCallback, '/plugin/gameboard/analytic');
             },
-            generateSpecific(field, value, finish, splunkQueries, elkQueries) {
-                splunkQueries.push(this.generateSplunkQuery(field, value, finish));
-                elkQueries.push(this.generateELKQuery(field, value));
-            },
             generateQueries(link, opType) {
                 if (!link || !opType) return {};
                 let splunkQueries = [];
@@ -598,6 +593,10 @@
                     Splunk: splunkQueries,
                     ELK: elkQueries
                 };
+            },
+            generateSpecific(field, value, finish, splunkQueries, elkQueries) {
+                splunkQueries.push(this.generateSplunkQuery(field, value, finish));
+                elkQueries.push(this.generateELKQuery(field, value));
             },
             generateSplunkQuery(field, value, finish) {
                 let earliest = this.incrementTime(finish, -5);
