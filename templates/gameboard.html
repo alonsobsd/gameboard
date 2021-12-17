@@ -1,5 +1,5 @@
-<div id="gameboardPage" x-data="alpineGameboard()" x-init="initPage()">
-    <div>
+<div id="gameboardPage" x-data="alpineGameboard()" x-init="initGameboard()">
+    <div x-ref="gameboardHeader">
         <h2>Gameboard<sub class="is-size-7 pl-1">red vs. blue exercises</sub></h2>
         <p>
             Monitor red-and-blue team operations during an exercise to see if blue can detect, respond, and
@@ -15,28 +15,31 @@
                 <th colspan="2">
                     <div class="is-flex is-flex-direction-column is-align-items-flex-end">
                         <div class="is-flex is-flex-direction-column is-align-items-center">
-                        <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
-                            <div><em class="fas fa-user pr-3 is-red-team is-size-2" alt="Red team"></em></div>
-                            <div class="is-flex is-flex-direction-row is-size-1">
-                                <div x-text="redOperation.points < 0 ? '-' : ''"></div>
-                                <div class="points-card has-background-black-ter mr-2 py-1 px-2" alt="Red team points"
-                                     x-text="Math.floor(Math.abs(redOperation.points / 10))"></div>
-                                <div class="points-card has-background-black-ter py-1 px-2" alt="Red team points"
-                                     x-text="Math.abs(redOperation.points % 10)"></div>
+                            <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
+                                <div><em class="fas fa-user pr-3 is-red-team is-size-2" alt="Red team"></em></div>
+                                <div class="is-flex is-flex-direction-row is-size-1">
+                                    <div x-text="redOperation.points < 0 ? '-' : ''"></div>
+                                    <div class="points-card has-background-black-ter mr-2 py-1 px-2"
+                                         alt="Red team points"
+                                         x-text="Math.floor(Math.abs(redOperation.points / 10))"></div>
+                                    <div class="points-card has-background-black-ter py-1 px-2" alt="Red team points"
+                                         x-text="Math.abs(redOperation.points % 10)"></div>
+                                </div>
                             </div>
+                            <label for="red-op-select" class="mb-1 is-size-7">Operation</label>
+                            <div class="select is-small">
+                                <select id="red-op-select" x-model="redOperation.id" x-on:change="getGameboardData">
+                                    <option value="">Select a red op</option>
+                                    <template x-for="op in redOps" :key="op.id">
+                                        <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
+                                    </template>
+                                </select>
+                            </div>
+                            <label x-show="redOperation.state"
+                                   x-bind:class="redOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
+                                   class="is-size-7 mt-2" for="red-op-select"
+                                   x-text="'is ' + redOperation.state"></label>
                         </div>
-                        <label for="red-op-select" class="mb-1 is-size-7">Operation</label>
-                        <div class="select is-small">
-                            <select id="red-op-select" x-model="redOperation.id" x-on:change="handleOperationChange">
-                                <option value="">Select a red op</option>
-                                <template x-for="op in redOps" :key="op.id">
-                                    <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <label x-show="redOperation.state" x-bind:class="redOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
-                               class="is-size-7 mt-2" for="red-op-select" x-text="'is ' + redOperation.state"></label>
-                    </div>
                     </div>
                 </th>
 
@@ -82,35 +85,39 @@
                 <th colspan="2">
                     <div class="is-flex is-flex-direction-column is-align-items-flex-start">
                         <div class="is-flex is-flex-direction-column is-align-items-center">
-                        <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
-                            <div class="is-flex is-flex-direction-row is-size-1">
-                                <div x-text="blueOperation.points < 0 ? '-' : ''"></div>
-                                <div class="points-card has-background-black-ter mr-2 py-1 px-2" alt="Blue team points"
-                                     x-text="Math.floor(Math.abs(blueOperation.points) / 10)"></div>
-                                <div class="points-card has-background-black-ter py-1 px-2" alt="Blue team points"
-                                     x-text="Math.abs(blueOperation.points % 10)"></div>
+                            <div class="is-flex is-flex-direction-row is-align-items-center pb-2">
+                                <div class="is-flex is-flex-direction-row is-size-1">
+                                    <div x-text="blueOperation.points < 0 ? '-' : ''"></div>
+                                    <div class="points-card has-background-black-ter mr-2 py-1 px-2"
+                                         alt="Blue team points"
+                                         x-text="Math.floor(Math.abs(blueOperation.points) / 10)"></div>
+                                    <div class="points-card has-background-black-ter py-1 px-2" alt="Blue team points"
+                                         x-text="Math.abs(blueOperation.points % 10)"></div>
+                                </div>
+                                <div><em class="pl-3 fas fa-user is-blue-team is-size-2" alt="Blue team"></em></div>
                             </div>
-                            <div><em class="pl-3 fas fa-user is-blue-team is-size-2" alt="Blue team"></em></div>
-                        </div>
-                        <label for="blue-op-select" class="mb-1 is-size-7">Operation</label>
-                        <div class="select is-small">
-                            <select id="blue-op-select" x-model="blueOperation.id" x-on:change="handleOperationChange">
-                                <option value="">Select a blue op</option>
-                                <template x-for="op in blueOps" :key="op.id">
-                                    <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
-                                </template>
-                            </select>
-                        </div>
-                        <label x-show="blueOperation.state" x-bind:class="blueOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
-                               class="is-size-7 mt-2" for="blue-op-select" x-text="'is ' + blueOperation.state"></label>
-                        <template x-if="exchanges.blue.length > 0">
-                            <div>
-                                <button x-on:click="openModal('Add External Detection')"
-                                        class="button is-primary is-blue-team is-small mt-3"><em class="pr-1 fas fa-plus"></em>External Detection
-                                </button>
+                            <label for="blue-op-select" class="mb-1 is-size-7">Operation</label>
+                            <div class="select is-small">
+                                <select id="blue-op-select" x-model="blueOperation.id" x-on:change="getGameboardData">
+                                    <option value="">Select a blue op</option>
+                                    <template x-for="op in blueOps" :key="op.id">
+                                        <option :value="op.id" x-text="op.name + ' - ' + op.start"></option>
+                                    </template>
+                                </select>
                             </div>
-                        </template>
-                    </div>
+                            <label x-show="blueOperation.state"
+                                   x-bind:class="blueOperation.state === 'running' ? 'has-text-success' : 'has-text-warning'"
+                                   class="is-size-7 mt-2" for="blue-op-select"
+                                   x-text="'is ' + blueOperation.state"></label>
+                            <template x-if="exchanges.blue.length > 0">
+                                <div>
+                                    <button x-on:click="openModal('Add External Detection')"
+                                            class="button is-primary is-blue-team is-small mt-3"><em
+                                            class="pr-1 fas fa-plus"></em>External Detection
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
                     </div>
                 </th>
             </tr>
@@ -122,13 +129,15 @@
                 </tr>
                 </tbody>
             </template>
-            <template x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
+            <template
+                    x-if="redOperation.id.length > 0 && blueOperation.id.length > 0 && exchanges.red && exchanges.blue">
                 <tbody>
                 <template x-for="(exchange, index) in dataExchanges" :key="'exchange-'+index">
                     <tr class="m-2">
                         <!--RED TEAM COLUMN-->
                         <td colspan="2">
-                            <div x-show="exchange[1].red.length > 0" class="is-flex is-align-items-flex-end is-flex-direction-column">
+                            <div x-show="exchange[1].red.length > 0"
+                                 class="is-flex is-align-items-flex-end is-flex-direction-column">
                                 <template x-for="redOp in exchange[1].red">
                                     <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card my-2 has-text-centered"
                                          x-on:click="openModal('Facts', redOp)"
@@ -144,7 +153,8 @@
                                         <template x-if="access === 'blue'">
                                             <span class="is-italic" x-text="redOp.ability.technique_id"></span>
                                         </template>
-                                        <span x-show="access === 'red' && redOp.facts.length > 0" class="facts-star"><em class="fas fa-star"></em></span>
+                                        <span x-show="access === 'red' && redOp.facts.length > 0" class="facts-star"><em
+                                                class="fas fa-star"></em></span>
                                     </div>
                                 </template>
                             </div>
@@ -153,14 +163,16 @@
                         <td colspan="1" class="is-size-2 is-red-team is-flex is-justify-content-flex-end">
                             <template x-for="redOp in exchange[1].red">
                                 <div class="is-red-team points-container p-2 my-2">
-                                    <span class="points-text" x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
+                                    <span class="points-text"
+                                          x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
                                     <span class="points-line is-red-team"></span>
                                 </div>
                             </template>
                         </td>
                         <td colspan="1" class="process-column">
                             <template x-if="exchange[1].red.length > 0 && exchange[1].blue.length > 0">
-                                <div title="Process ID" class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
+                                <div title="Process ID"
+                                     class="is-flex is-justify-content-center is-flex-direction-column has-background-black-ter points-card has-text-centered px-5 py-3">
                                     <p class="mb-0 is-size-7 has-background-black-ter">pid</p>
                                     <p class="is-italic is-size-6 has-background-black-ter" x-text="exchange[0]"></p>
                                 </div>
@@ -170,29 +182,34 @@
                         <td colspan="1" class="is-size-2 is-blue-team">
                             <template x-for="blueOp in exchange[1].blue">
                                 <div class="is-blue-team points-container p-2 my-2">
-                                    <span class="points-text" x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"></span>
+                                    <span class="points-text"
+                                          x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"></span>
                                     <span class="points-line is-blue-team"></span>
                                 </div>
                             </template>
                         </td>
                         <!--BLUE TEAM COLUMN-->
                         <td colspan="2">
-                            <div x-show="exchange[1].blue.length > 0" class="is-flex is-justify-content-flex-start is-flex-direction-column">
+                            <div x-show="exchange[1].blue.length > 0"
+                                 class="is-flex is-justify-content-flex-start is-flex-direction-column">
                                 <template x-for="blueOp in exchange[1].blue">
                                     <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 my-2 card has-text-centered"
                                          x-on:click="openModal('Facts', blueOp)"
                                          x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'">
                                         <template x-if="access === 'red'">
-                                            <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
+                                            <span class="is-italic"
+                                                  x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
                                         </template>
                                         <template x-if="access === 'blue'">
                                             <div class="is-flex is-flex-direction-column is-align-items-center">
-                                                <span class="is-italic" x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
+                                                <span class="is-italic"
+                                                      x-text="blueOp.ability && blueOp.ability.name ? blueOp.ability.name : 'Click for more details.'"></span>
                                                 <span x-text="blueOp.finish ? getHumanFriendlyTimeISO8601(blueOp?.finish) : ''"></span>
                                                 <span class="is-italic" x-text="blueOp?.paw"></span>
                                             </div>
                                         </template>
-                                        <span x-show="access === 'blue' && blueOp?.facts?.length > 0" class="facts-star"><em class="fas fa-star"></em></span>
+                                        <span x-show="access === 'blue' && blueOp?.facts?.length > 0"
+                                              class="facts-star"><em class="fas fa-star"></em></span>
                                     </div>
                                 </template>
                             </div>
@@ -297,48 +314,52 @@
                                     <label x-show="detectByGuid == 0" for="detection-id-choice">pid</label>
                                     <label x-show="detectByGuid == 1" for="detection-id-choice">guid</label>
                                     <div class="modal-form-fields">
-                                        <input id="detection-id-input" class="mt-4 ml-4 input is-small" x-model="detectionID">
+                                        <input id="detection-id-input" class="mt-4 ml-4 input is-small"
+                                               x-model="detectionID">
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </template>
-                    <template x-if="modal.title.includes('Facts') && modal.content && modal.content.unique">
+                    <template x-if="modal.title.includes('Facts') && modal.content">
                         <div>
-                            <div class="modal-form">
-                                <template x-if="modal.content.unique">
-                                    <div>
-                                        <label for="fact-unique">Unique</label>
-                                        <div class="modal-form-fields">
-                                            <input class="input is-small" id="fact-unique"
-                                                   x-bind:value="modal.content.unique" readonly>
+                            <template x-if="modal.content.unique">
+                                <div class="modal-form">
+                                    <template x-if="modal.content.unique">
+                                        <div>
+                                            <label for="fact-unique">Unique</label>
+                                            <div class="modal-form-fields">
+                                                <input class="input is-small" id="fact-unique"
+                                                       x-bind:value="modal.content.unique" readonly>
+                                            </div>
                                         </div>
-                                    </div>
-                                </template>
-                                <template x-if="modal.content !== {} && modal.content.ability && modal.content.ability.technique_id && modal.content.ability.technique_name">
-                                    <div x-data="{concatName: modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name}">
-                                        <label for="fact-command">Command</label>
-                                        <div class="modal-form-fields">
-                                            <input class="input is-small" id="fact-command"
-                                                   x-bind:value="concatName" readonly>
+                                    </template>
+                                    <template
+                                            x-if="modal.content !== {} && modal.content.ability && modal.content.ability.technique_id && modal.content.ability.technique_name">
+                                        <div x-data="{concatName: modal.content.ability.technique_id + ': ' + modal.content.ability.technique_name}">
+                                            <label for="fact-command">Command</label>
+                                            <div class="modal-form-fields">
+                                                <input class="input is-small" id="fact-command"
+                                                       x-bind:value="concatName" readonly>
+                                            </div>
                                         </div>
-                                    </div>
-                                </template>
-                                <template x-if="modal.content.output">
-                                    <div>
-                                        <label for="fact-output">Output</label>
-                                        <div class="modal-form-fields" x-show="modal.content.output !== 'False'">
-                                            <code class="has-text-white m-2" id="fact-output">
-                                                <p x-text="linkOutput"></p>
-                                            </code>
+                                    </template>
+                                    <template x-if="modal.content.output">
+                                        <div>
+                                            <label for="fact-output">Output</label>
+                                            <div class="modal-form-fields" x-show="modal.content.output !== 'False'">
+                                                <code class="has-text-white m-2" id="fact-output">
+                                                    <p x-text="linkOutput"></p>
+                                                </code>
+                                            </div>
+                                            <div class="modal-form-fields" x-show="modal.content.output === 'False'">
+                                                <input class="input is-italic is-small" id="fact-output"
+                                                       x-bind:value="'No output'" readonly>
+                                            </div>
                                         </div>
-                                        <div class="modal-form-fields" x-show="modal.content.output === 'False'">
-                                            <input class="input is-italic is-small" id="fact-output"
-                                                   x-bind:value="'No output'" readonly>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
+                                    </template>
+                                </div>
+                            </template>
                             <template x-if="modal?.content?.points?.reason">
                                 <div>
                                     <div class="modal-form">
@@ -352,42 +373,51 @@
                                     </div>
                                 </div>
                             </template>
-                            <div class="modal-form-group-header">
-                                <button type="button" class="button no-style heading pt-2"
-                                        x-on:click="expandQueries = !expandQueries"
-                                        x-bind:class="expandQueries ? 'expanded' : 'collapsed'">
-                                    <span>
-                                        Suggested Queries
-                                        <em x-show="!expandQueries" class="fas fa-caret-right"></em>
-                                        <em x-show="expandQueries" class="fas fa-caret-down"></em>
-                                    </span>
-                                    <span class="navbar-divider"></span>
-                                </button>
-                            </div>
-                            <div class="modal-form" x-show="expandQueries" x-data="{generatedQueries: generateQueries(modal.content, access)}">
-                                <template x-if="generatedQueries && generatedQueries.ELK?.length > 0">
-                                    <div>
-                                        <label for="fact-elk-queries" class="is-align-items-flex-start mt-3">ELK Queries</label>
-                                        <div class="modal-form-fields" id="fact-elk-queries">
-                                            <template x-for="(query, index) in generatedQueries.ELK" :key="'query-elk-'+index">
-                                                <code class="has-text-white m-2" x-text="query">
-                                                </code>
-                                            </template>
-                                        </div>
+                            <template x-if="modal.content.unique">
+                                <div>
+                                    <div class="modal-form-group-header">
+                                        <button type="button" class="button no-style heading pt-2"
+                                                x-on:click="expandQueries = !expandQueries"
+                                                x-bind:class="expandQueries ? 'expanded' : 'collapsed'">
+                                            <span>
+                                                Suggested Queries
+                                                <em x-show="!expandQueries" class="fas fa-caret-right"></em>
+                                                <em x-show="expandQueries" class="fas fa-caret-down"></em>
+                                            </span>
+                                            <span class="navbar-divider"></span>
+                                        </button>
                                     </div>
-                                </template>
-                                <template x-if="generatedQueries && generatedQueries.Splunk?.length > 0">
-                                    <div>
-                                        <label for="fact-splunk-queries" class="is-align-items-flex-start mt-3">Splunk Queries</label>
-                                        <div class="modal-form-fields" id="fact-splunk-queries">
-                                            <template x-for="(query, index) in generatedQueries.Splunk" :key="'query-splunk-'+index">
-                                                <code class="has-text-white m-2" x-text="query">
-                                                </code>
-                                            </template>
-                                        </div>
+                                    <div class="modal-form" x-show="expandQueries"
+                                         x-data="{generatedQueries: generateQueries(modal.content, access)}">
+                                        <template x-if="generatedQueries && generatedQueries.ELK?.length > 0">
+                                            <div>
+                                                <label for="fact-elk-queries" class="is-align-items-flex-start mt-3">ELK
+                                                    Queries</label>
+                                                <div class="modal-form-fields" id="fact-elk-queries">
+                                                    <template x-for="(query, index) in generatedQueries.ELK"
+                                                              :key="'query-elk-'+index">
+                                                        <code class="has-text-white m-2" x-text="query">
+                                                        </code>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template x-if="generatedQueries && generatedQueries.Splunk?.length > 0">
+                                            <div>
+                                                <label for="fact-splunk-queries" class="is-align-items-flex-start mt-3">Splunk
+                                                    Queries</label>
+                                                <div class="modal-form-fields" id="fact-splunk-queries">
+                                                    <template x-for="(query, index) in generatedQueries.Splunk"
+                                                              :key="'query-splunk-'+index">
+                                                        <code class="has-text-white m-2" x-text="query">
+                                                        </code>
+                                                    </template>
+                                                </div>
+                                            </div>
+                                        </template>
                                     </div>
-                                </template>
-                            </div>
+                                </div>
+                            </template>
                         </div>
                     </template>
                 </section>
@@ -401,7 +431,9 @@
                             </template>
                             <template x-if="modal.title.includes('Facts')">
                                 <div class="level-item">
-                                    <button class="button is-small" @click="modal.isOpen = false; modal.content = {}">Close</button>
+                                    <button class="button is-small" @click="modal.isOpen = false; modal.content = {}">
+                                        Close
+                                    </button>
                                 </div>
                             </template>
                         </div>
@@ -466,10 +498,14 @@
             huntResults: '',
             linkOutput: '',
 
-            initPage() {
+            async initGameboard() {
                 if (this.allTactics) this.tactics = Object.keys(this.allTactics);
+                while (this.$refs.gameboardHeader) {
+                    await sleep(3000);
+                    this.getGameboardData();
+                }
             },
-            handleOperationChange() {
+            getGameboardData() {
                 const render = (data) => {
                     this.resetTables();
                     this.redOperation.state = data.red_op_state;
@@ -537,7 +573,11 @@
                 function loadResults(data) {
                     return data.output ? b64DecodeUnicode(data.output) : '';
                 }
-                restRequest('POST', { index: 'result', link_id: linkID }, (d) => {
+
+                restRequest('POST', {
+                    index: 'result',
+                    link_id: linkID
+                }, (d) => {
                     this.linkOutput = loadResults(d);
                 });
             },
@@ -546,7 +586,9 @@
                 if (data) this.modal.content = data;
                 if (title.includes('Fact') && data.id) {
                     this.getOutput(data.id);
-                } else this.linkOutput = '';
+                } else {
+                    this.linkOutput = '';
+                }
                 this.modal.isOpen = true;
             },
             updateStats(exchanges) {
@@ -681,7 +723,7 @@
         color: white;
         width: 315px;
         height: 80px;
-        z-index: 2;
+        z-index: 3;
     }
 
     #gameboardPage .card.is-red-team, #gameboardPage .points-container.is-red-team {
