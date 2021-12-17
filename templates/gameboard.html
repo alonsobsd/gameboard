@@ -150,7 +150,7 @@
                             </div>
                         </td>
                         <!--RED POINTS COLUMN-->
-                        <td colspan="1" class="is-size-2 is-red-team">
+                        <td colspan="1" class="is-size-2 is-red-team is-flex is-justify-content-flex-end">
                             <template x-for="redOp in exchange[1].red">
                                 <div class="is-red-team points-container p-2 my-2">
                                     <span class="points-text" x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
@@ -297,7 +297,7 @@
                                     <label x-show="detectByGuid == 0" for="detection-id-choice">pid</label>
                                     <label x-show="detectByGuid == 1" for="detection-id-choice">guid</label>
                                     <div class="modal-form-fields">
-                                        <input id="detection-id-input" class="mt-4 ml-4" x-model="detectionID">
+                                        <input id="detection-id-input" class="mt-4 ml-4 input is-small" x-model="detectionID">
                                     </div>
                                 </div>
                             </div>
@@ -339,11 +339,28 @@
                                     </div>
                                 </template>
                             </div>
+                            <template x-if="modal?.content?.points?.reason">
+                                <div>
+                                    <div class="modal-form">
+                                        <div>
+                                            <label for="fact-reason">Reason</label>
+                                            <div class="modal-form-fields">
+                                                <input class="input is-small" id="fact-reason"
+                                                       x-bind:value="modal?.content?.points?.reason" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
                             <div class="modal-form-group-header">
                                 <button type="button" class="button no-style heading pt-2"
                                         x-on:click="expandQueries = !expandQueries"
                                         x-bind:class="expandQueries ? 'expanded' : 'collapsed'">
-                                    <span>Suggested Queries</span>
+                                    <span>
+                                        Suggested Queries
+                                        <em x-show="!expandQueries" class="fas fa-caret-right"></em>
+                                        <em x-show="expandQueries" class="fas fa-caret-down"></em>
+                                    </span>
                                     <span class="navbar-divider"></span>
                                 </button>
                             </div>
@@ -370,19 +387,6 @@
                                         </div>
                                     </div>
                                 </template>
-                            </div>
-                        </div>
-                    </template>
-                    <template x-if="modal?.content?.points?.reason">
-                        <div>
-                            <div class="modal-form">
-                                <div>
-                                    <label for="fact-reason">Reason</label>
-                                    <div class="modal-form-fields">
-                                        <input class="input is-small" id="fact-reason"
-                                               x-bind:value="modal?.content?.points?.reason" readonly>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </template>
@@ -699,15 +703,15 @@
         z-index: 1;
     }
 
-    #gameboardPage .points-line.is-red-team:before {
+    #gameboardPage .points-line.is-red-team:after {
         background: #ea1543;
         content: "";
-        width: 5%;
+        width: 6%;
         height: 3px;
         display: flex;
         position: absolute;
         z-index: 0;
-        transform: translate(-90px, -25px);
+        transform: translate(-100px, -25px);
     }
 
     #gameboardPage .points-line.is-blue-team:after {
