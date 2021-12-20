@@ -139,7 +139,7 @@
                             <div x-show="exchange[1].red.length > 0"
                                  class="is-flex is-align-items-flex-end is-flex-direction-column">
                                 <template x-for="redOp in exchange[1].red">
-                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card my-2 has-text-centered"
+                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 card has-red-line my-2 has-text-centered"
                                          x-on:click="openModal('Facts', redOp)"
                                          x-bind:class="access === 'red' ? 'is-red-team' : 'has-background-black-ter'">
                                         <button class="facts-link has-text-white"
@@ -165,7 +165,6 @@
                                 <div class="is-red-team points-container p-2 mt-4 mb-5">
                                     <span class="points-text"
                                           x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
-                                    <span class="points-line is-red-team"></span>
                                 </div>
                             </template>
                         </td>
@@ -184,7 +183,6 @@
                                 <div class="is-blue-team points-container p-2 mt-4 mb-5">
                                     <span class="points-text"
                                           x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"></span>
-                                    <span class="points-line is-blue-team"></span>
                                 </div>
                             </template>
                         </td>
@@ -702,17 +700,12 @@
         position: absolute;
         margin-left: 7px;
         margin-top: 42px;
-        z-index: 1;
     }
 
     #gameboardPage button.no-style {
         background-color: transparent;
         border: none;
         box-shadow: none;
-    }
-
-    #gameboardPage .process-column p {
-        z-index: 2;
     }
 
     #gameboardPage .points-card {
@@ -725,37 +718,26 @@
         color: white;
         width: 315px;
         height: 80px;
-        z-index: 3;
     }
 
     #gameboardPage .card.is-red-team, #gameboardPage .points-container.is-red-team {
         background-color: #ea1543;
-        z-index: 2;
     }
 
     #gameboardPage button.is-blue-team, #gameboardPage .card.is-blue-team, #gameboardPage .points-container.is-blue-team {
         background-color: #4C4CF2;
         color: white;
-        z-index: 2;
     }
 
-    #gameboardPage .points-text {
-        z-index: 2;
-    }
-
-    #gameboardPage .points-line {
-        z-index: 1;
-    }
-
-    #gameboardPage .points-line.is-red-team:after {
+    #gameboardPage .card.has-red-line:after {
         background: #ea1543;
         content: "";
-        width: 6%;
+        width: 15%;
         height: 3px;
         display: flex;
         position: absolute;
         z-index: 0;
-        transform: translate(-100px, -25px);
+        transform: translate(181px, -5px);
     }
 
     #gameboardPage .card.has-blue-line:before {
