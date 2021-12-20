@@ -162,7 +162,7 @@
                         <!--RED POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-red-team is-flex is-justify-content-flex-end">
                             <template x-for="redOp in exchange[1].red">
-                                <div class="is-red-team points-container p-2 my-2">
+                                <div class="is-red-team points-container p-2 mt-4 mb-5">
                                     <span class="points-text"
                                           x-text="redOp.points.value >= 0 ? '+'+redOp.points.value : redOp.points.value"></span>
                                     <span class="points-line is-red-team"></span>
@@ -181,7 +181,7 @@
                         <!--BLUE POINTS COLUMN-->
                         <td colspan="1" class="is-size-2 is-blue-team">
                             <template x-for="blueOp in exchange[1].blue">
-                                <div class="is-blue-team points-container p-2 my-2">
+                                <div class="is-blue-team points-container p-2 mt-4 mb-5">
                                     <span class="points-text"
                                           x-text="blueOp.points.value >= 0 ? '+'+blueOp.points.value : blueOp.points.value"></span>
                                     <span class="points-line is-blue-team"></span>
@@ -190,10 +190,11 @@
                         </td>
                         <!--BLUE TEAM COLUMN-->
                         <td colspan="2">
-                            <div x-show="exchange[1].blue.length > 0"
-                                 class="is-flex is-justify-content-flex-start is-flex-direction-column">
+                            <!--  Use blueOp.finish to determine whether or not to show a card (if blueOp.finish DNE, then it was not detected -->
+                            <template x-if="exchange[1].blue.length > 0 && exchange[1].blue[0].finish">
+                                <div class="is-flex is-justify-content-flex-start is-flex-direction-column">
                                 <template x-for="blueOp in exchange[1].blue">
-                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 my-2 card has-text-centered"
+                                    <div class="is-flex is-flex-direction-column is-align-items-center is-justify-content-center p-2 my-2 card has-blue-line has-text-centered"
                                          x-on:click="openModal('Facts', blueOp)"
                                          x-bind:class="access === 'blue' ? 'is-blue-team' : 'has-background-black-ter'">
                                         <template x-if="access === 'red'">
@@ -213,6 +214,7 @@
                                     </div>
                                 </template>
                             </div>
+                            </template>
                         </td>
                     </tr>
                 </template>
@@ -756,15 +758,15 @@
         transform: translate(-100px, -25px);
     }
 
-    #gameboardPage .points-line.is-blue-team:after {
+    #gameboardPage .card.has-blue-line:before {
         background: #4C4CF2;
         content: "";
-        width: 5%;
+        width: 15%;
         height: 3px;
         display: flex;
         position: absolute;
         z-index: 0;
-        transform: translate(55px, -25px);
+        transform: translate(-181px, -5px);
     }
 
     #gameboardPage .points-container {
